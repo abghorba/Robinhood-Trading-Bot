@@ -176,6 +176,8 @@ class TradeBotVWAP(TradeBot):
         else:
             return None
 
+# There is a bug in the robin_stocks library that breaks
+# this bot. DO NOT USE.
 class TradeBotCryptoVWAP(TradeBotCrypto):
     def __init__(self, trade_list):
         TradeBotCrypto.__init__(self, trade_list)
