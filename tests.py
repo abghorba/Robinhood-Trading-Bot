@@ -15,4 +15,25 @@ class TestTradeBot():
         test_bot = trade_bot.TradeBot(sample_stock_list)
         test_bot.update_trade_list(sample_stock_list2)
         assert test_bot.get_current_trade_list() == sample_stock_list2
+
+    def test_make_order_recommendation(self):
+        pass
     
+    def test_trade(self):
+        pass
+    
+class TestTradeBotCrypto():    
+    def test_get_current_trade_list(self):
+        test_bot = trade_bot.TradeBotCrypto(sample_crypto_list)
+        assert test_bot.get_current_trade_list() == sample_crypto_list
+    
+    def test_update_trade_list(self):
+        test_bot = trade_bot.TradeBotCrypto(sample_crypto_list)
+        test_bot.update_trade_list(sample_crypto_list2)
+        assert test_bot.get_current_trade_list() == sample_crypto_list2
+
+    def test_make_order_recommendation(self):
+        pass
+    
+    def test_trade(self):
+        pass

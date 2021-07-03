@@ -4,20 +4,48 @@ import pandas as pd
 import time
 
 class TradeBot():
-    def __init__(self, trade_list):
+    def __init__(self, trade_list=[]):
+        """
+        Constructs the TradeBot object with the trade list.
+
+        :param trade_list: A list of ticker symbols.
+        :type trade_list: list
+        :returns: None
+
+        """
         self.trade_list = trade_list
     
     def update_trade_list(self, new_trade_list):
+        """
+        Updates the current trade list.
+
+        :param new_trade_list: The list of ticker symbols to update to.
+        :type new_trade_list: list
+        :returns: None
+
+        """
         self.trade_list = new_trade_list
 
     def get_current_trade_list(self):
+        """
+        Returns the current trade list.
+
+        :returns: The current trade list as a list.
+
+        """
+
         return self.trade_list
 
     def make_order_recommendation(self, ticker_symbol):
         """
         Makes a recommendation for a market order by comparing
         the 50-day moving average to the 200-day moving average.
-        Returns 'b' for buy, 's' for sell, or None for neither.
+        Returns 'b' for buy, 's' for sell, or 'x' for neither.
+
+        :param ticker_symbol: A ticker symbol.
+        :type ticker_symbol: str
+        :returns: A string with the order recommendation.
+
         """
         stock_history = robinhood.stocks.get_stock_historicals(ticker_symbol, 
                                                                interval='day', 
@@ -28,23 +56,26 @@ class TradeBot():
         #Calculate the 200-day moving average.
         stock_200_day_history = stock_history_df.tail(200)
         moving_average_200_day = stock_200_day_history['close_price'].mean()
-        print(moving_average_200_day)
 
         #Calculate the 50-day moving average.
         stock_50_day_history = stock_history_df.tail(50)
         moving_average_50_day = stock_50_day_history['close_price'].mean()
-        print(moving_average_50_day)
 
         if moving_average_50_day > moving_average_200_day:
             return 'b'
         elif moving_average_50_day < moving_average_200_day:
             return 's'
         else:
-            return None
+            return 'x'
 
     def trade(self, amount_in_dollars = 1):
         """
         Places buy/sell orders for fractional shares of stock.
+
+        :param amount_in_dollars: The amount to transact with.
+        :type amount_in_dollars: float
+        :returns: None
+
         """
         for ticker_symbol in self.trade_list:
             action = self.make_order_recommendation(ticker_symbol)
@@ -97,12 +128,10 @@ class TradeBotCrypto(TradeBot):
         #Calculate the 200-day moving average.
         crypto_200_day_history = crypto_history_df.tail(200)
         moving_average_200_day = crypto_200_day_history['close_price'].mean()
-        print(moving_average_200_day)
 
         #Calculate the 50-day moving average.
         crypto_50_day_history = crypto_history_df.tail(50)
         moving_average_50_day = crypto_50_day_history['close_price'].mean()
-        print(moving_average_50_day)
 
         if moving_average_50_day > moving_average_200_day:
             return 'b'
@@ -150,7 +179,12 @@ class TradeBotVWAP(TradeBot):
         Makes a recommendation for a market order by comparing
         the Volume-Weighted Average Price (VWAP) to the current
         market price.
-        Returns 'b' for buy, 's' for sell, or None for neither.
+        Returns 'b' for buy, 's' for sell, or 'x' for neither.
+
+        :param ticker_symbol: A ticker symbol.
+        :type ticker_symbol: str
+        :returns: A string with the order recommendation.
+
         """
         stock_history = robinhood.stocks.get_stock_historicals(ticker_symbol, 
                                                                interval='5minute', 
@@ -163,18 +197,16 @@ class TradeBotVWAP(TradeBot):
         sum_of_volumes = stock_history_df['volume'].sum()
         sum_of_prices_times_volumes = stock_history_df['volume'].dot(stock_history_df['close_price'])
         vwap = round(sum_of_prices_times_volumes / sum_of_volumes, 2)
-        print(f"vwap is {vwap}")
 
         #Get the current market price of the stock.
         current_price = float(robinhood.stocks.get_latest_price(ticker_symbol, includeExtendedHours=False)[0])
-        print(f"current price is {current_price}")
 
         if current_price < vwap + buy_threshold:
             return 'b'
         elif current_price > vwap + sell_threshold:
             return 's'
         else:
-            return None
+            return 'x'
 
 # There is a bug in the robin_stocks library that breaks
 # this bot. DO NOT USE.
@@ -182,12 +214,21 @@ class TradeBotCryptoVWAP(TradeBotCrypto):
     def __init__(self, trade_list):
         TradeBotCrypto.__init__(self, trade_list)
 
-    def make_order_recommendation(self, crypto_symbol, buy_threshold=0, sell_threshold=0):
+    def make_order_recommendation(self, crypto_symbol, buy_threshold=0.00, sell_threshold=0.00):
         """
         Makes a recommendation for a market order by comparing
         the Volume-Weighted Average Price (VWAP) to the current
         market price.
         Returns 'b' for buy, 's' for sell, or None for neither.
+
+        :param ticker_symbol: A ticker symbol.
+        :param buy_threshold: The amount amove the VWAP you would still like to buy.
+        :param sell_threshold: The amount amove the VWAP you would still like to sell.
+        :type ticker_symbol: str
+        :type buy_threshold: float
+        :type sell_threshold: float
+        :returns: A string with the order recommendation.
+
         """
         crypto_history = robinhood.crypto.get_crypto_historicals(crypto_symbol, 
                                                                  interval='5minute', 
@@ -195,21 +236,16 @@ class TradeBotCryptoVWAP(TradeBotCrypto):
         crypto_history_df = pd.DataFrame(crypto_history)
         crypto_history_df['close_price'] = pd.to_numeric(crypto_history_df['close_price'], errors='coerce')
         crypto_history_df['volume'] = pd.to_numeric(crypto_history_df['volume'], errors='coerce')
-        print(crypto_history_df)
 
         #Calculate the VWAP from the last day in 5 minute intervals.
         #Note: there is a bug that returns 0 in the volume columns!
         #This breaks this algorithm, and is pending fix.
         sum_of_volumes = crypto_history_df['volume'].sum()
         sum_of_prices_times_volumes = crypto_history_df['volume'].dot(crypto_history_df['close_price'])
-        print(sum_of_prices_times_volumes)
-        print(sum_of_volumes)
         vwap = sum_of_prices_times_volumes / sum_of_volumes
-        print(f"vwap is {vwap}")
 
         #Get the current market price of the stock.
         current_price = robinhood.crypto.get_crypto_quote(crypto_symbol)['ask_price']
-        print(f"current price is {current_price}")
 
         if current_price < vwap + buy_threshold:
             return 'b'
