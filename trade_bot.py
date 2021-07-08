@@ -34,6 +34,42 @@ class TradeBot():
         """
 
         return self.trade_list
+        
+    def buy_with_available_funds(self, ticker):
+        """
+        Buys ticker with all available funds.
+
+        :param ticker: A ticker symbol.
+        :type ticker: str
+        :returns: A dictionary.
+
+        """
+        available_funds = float(robinhood.profiles.load_account_profile(info='buying_power'))
+
+        return robinhood.orders.order_buy_fractional_by_price(ticker, 
+                                                              available_funds,
+                                                              timeInForce='gfd', 
+                                                              extendedHours=False,
+                                                              jsonify=True)
+
+    def sell_entire_position(self, ticker):
+        """
+        Sells entire position in ticker.
+
+        :param ticker: A ticker symbol.
+        :type ticker: str
+        :returns: A dictionary.
+
+        """
+        portfolio = robinhood.account.build_holdings()
+        position = my_holdings[ticker]
+        equity = float(my_holding_in_ticker['equity'])
+
+        return robinhood.orders.order_sell_fractional_by_price(ticker, 
+                                                               equity,
+                                                               timeInForce='gfd',
+                                                               extendedHours=False,
+                                                               jsonify=True)
 
     def make_order_recommendation(self, symbol):
         """
@@ -213,42 +249,6 @@ class TradeBotPairsTrading(TradeBot):
             return 's'
         else:
             return 'x'
-
-    def buy_with_available_funds(self, ticker):
-        """
-        Buys ticker with all available funds.
-
-        :param ticker: A ticker symbol.
-        :type ticker: str
-        :returns: A dictionary.
-
-        """
-        available_funds = float(robinhood.profiles.load_account_profile(info='buying_power'))
-
-        return robinhood.orders.order_buy_fractional_by_price(ticker, 
-                                                              available_funds,
-                                                              timeInForce='gfd', 
-                                                              extendedHours=False,
-                                                              jsonify=True)
-
-    def sell_entire_position(self, ticker):
-        """
-        Sells entire position in ticker.
-
-        :param ticker: A ticker symbol.
-        :type ticker: str
-        :returns: A dictionary.
-
-        """
-        portfolio = robinhood.account.build_holdings()
-        position = my_holdings[ticker]
-        equity = float(my_holding_in_ticker['equity'])
-
-        return robinhood.orders.order_sell_fractional_by_price(ticker, 
-                                                               equity,
-                                                               timeInForce='gfd',
-                                                               extendedHours=False,
-                                                               jsonify=True)
 
     def trade(self):
         """
