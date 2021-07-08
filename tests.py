@@ -26,6 +26,28 @@ class TestTradeBot():
         test_bot.update_trade_list(sample_stock_list2)
         assert test_bot.get_current_trade_list() == sample_stock_list2
 
+    def test_buy_with_available_funds(self):
+        test_bot = trade_bot.TradeBot(sample_stock_list)
+        available_funds = float(robinhood.profiles.load_account_profile(info='buying_power'))
+        test_bot.buy_with_available_funds('AAPL')
+        available_funds = float(robinhood.profiles.load_account_profile(info='buying_power'))
+
+        assert available_funds == 0
+
+    def test_sell_entire_position(self):
+        test_bot = trade_bot.TradeBot(sample_stock_list)
+        test_bot.sell_entire_position('AAPL')
+        current_portfolio = robinhood.account.build_holdings()
+
+        assert 'AAPL' not in current_portfolio
+
+    def test_liquidate_portfolio(self):
+        test_bot = trade_bot.TradeBot(sample_stock_list)
+        test_bot.liquidate_portfolio()
+        current_portfolio = robinhood.account.build_holdings()
+        
+        assert len(current_portfolio) == 0
+
     def test_make_order_recommendation(self):
         test_bot = trade_bot.TradeBot(sample_stock_list)
         recommend_1 = test_bot.make_order_recommendation('AAPL')

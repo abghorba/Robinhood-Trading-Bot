@@ -34,7 +34,7 @@ class TradeBot():
         """
 
         return self.trade_list
-        
+
     def buy_with_available_funds(self, ticker):
         """
         Buys ticker with all available funds.
@@ -62,14 +62,32 @@ class TradeBot():
 
         """
         portfolio = robinhood.account.build_holdings()
-        position = my_holdings[ticker]
-        equity = float(my_holding_in_ticker['equity'])
+        position = portfolio[ticker]
+        equity = float(position['equity'])
 
         return robinhood.orders.order_sell_fractional_by_price(ticker, 
                                                                equity,
                                                                timeInForce='gfd',
                                                                extendedHours=False,
                                                                jsonify=True)
+
+    def liquidate_portfolio(self):
+        """
+        Completely liquidates all positions.
+
+        :return: None
+        
+        """
+        portfolio = robinhood.account.build_holdings()
+
+        for position in portfolio:
+            equity = float(position['equity'])
+            robinhood.orders.order_sell_fractional_by_price(position, 
+                                                            equity,
+                                                            timeInForce='gfd',
+                                                            extendedHours=False,
+                                                            jsonify=True)
+
 
     def make_order_recommendation(self, symbol):
         """
