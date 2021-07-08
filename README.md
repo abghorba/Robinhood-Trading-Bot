@@ -7,4 +7,3 @@ Volume-Weighted Average Price Comparison
 Planned algorithms to be implemented:
 Pairs Trading
 Sentiment Analysis
-Statistical Arbitrage
