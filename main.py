@@ -22,11 +22,11 @@ def main():
     # current_holdings = robinhood.build_holdings()
     # print(current_holdings)
 
-    # stock_trade_list = ['AMZN', 'AAPL', 'MSFT', 'FB', 'GOOG', 'TSLA', 'ENPH', 'NIO', 'TDOC']
-    # stock_bot = trade_bot.TradeBot(stock_trade_list)
-    # for ticker in stock_trade_list:
-    #     print(ticker)
-    #     print(stock_bot.make_order_recommendation(ticker))
+    stock_trade_list = ['AMZN', 'AAPL', 'MSFT', 'FB', 'GOOG', 'TSLA', 'ENPH', 'NIO', 'TDOC']
+    stock_bot = trade_bot.TradeBot(stock_trade_list)
+    for ticker in stock_trade_list:
+        print(ticker)
+        print(stock_bot.make_order_recommendation(ticker))
 
     # crypto_trade_list = ['DOGE', 'ETH', 'BTC', 'ADA']
     # crypto_bot = trade_bot.TradeBotCrypto(crypto_trade_list)
@@ -39,11 +39,6 @@ def main():
     # for ticker in stock_trade_list:
     #     print(ticker)
     #     print(stock_bot.make_order_recommendation(ticker))
-    
-
-    # current_holdings = robinhood.build_holdings()
-    # print(current_holdings)
-
 
 if __name__ == "__main__":
     main()
