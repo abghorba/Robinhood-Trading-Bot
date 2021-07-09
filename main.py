@@ -3,6 +3,16 @@ import robin_stocks.robinhood as robinhood
 import os
 import trade_bot
 
+def robinhood_login():
+    robin_user = os.environ.get("robinhood_username")
+    robin_pass = os.environ.get("robinhood_password")
+
+    robinhood.login(username=robin_user,
+                    password=robin_pass,
+                    expiresIn=86400,
+                    by_sms=True)
+
+
 def trade_stock_bot(trade_list, algorithm_type):
     if algorithm_type == 1:
         crypto_bot = trade_bot.TradeBot(trade_list)
@@ -36,13 +46,7 @@ def trade_crypto_bot(trade_list, algorithm_type):
     crypto_bot.trade()
 
 def main():
-    robin_user = os.environ.get("robinhood_username")
-    robin_pass = os.environ.get("robinhood_password")
-
-    robinhood.login(username=robin_user,
-                    password=robin_pass,
-                    expiresIn=86400,
-                    by_sms=True)
+    robinhood_login()
 
     stock_trade_list = ['AAPL', 'ENPH']
     crypto_trade_list = ['BTC', 'DOGE']
