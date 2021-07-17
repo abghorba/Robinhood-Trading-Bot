@@ -1,61 +1,52 @@
 import robin_stocks.robinhood as robinhood
-
+import pandas as pd
 import os
 import trade_bot
+import tweepy
+from config import ROBINHOOD_USER, ROBINHOOD_PASS, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 def robinhood_login():
-    robin_user = os.environ.get("robinhood_username")
-    robin_pass = os.environ.get("robinhood_password")
-
-    robinhood.login(username=robin_user,
-                    password=robin_pass,
-                    expiresIn=86400,
-                    by_sms=True)
-
-
-def trade_stock_bot(trade_list, algorithm_type):
-    if algorithm_type == 1:
-        crypto_bot = trade_bot.TradeBot(trade_list)
-    elif algorithm_type == 2:
-        crypto_bot = trade_bot.TradeBotVWAP(trade_list)
-    elif algorithm_type == 3:
-        crypto_bot = trade_bot.TradeBotPairsTrading(trade_list)
-    elif algorithm_type == 4:
-        crypto_bot = trade_bot.TradeBotSentimentAnalysis(trade_list)
-    else:
-        raise Exception('Invalid algorithm type.')
-        
-    for ticker in trade_list:
-        print(ticker, stock_bot.make_order_recommendation(ticker))
-    stock_bot.trade()
-
-def trade_crypto_bot(trade_list, algorithm_type):
-    if algorithm_type == 1:
-        crypto_bot = trade_bot.TradeBotCrypto(trade_list)
-    elif algorithm_type == 2:
-        crypto_bot = trade_bot.TradeBotCryptoVWAP(trade_list)
-    elif algorithm_type == 3:
-        crypto_bot = trade_bot.TradeBotCryptoPairsTrading(trade_list)
-    elif algorithm_type == 4:
-        crypto_bot = trade_bot.TradeBotCryptoSentimentAnalysis(trade_list)
-    else:
-        raise Exception('Invalid algorithm type.')
-
-    for ticker in trade_list:
-        print(ticker, crypto_bot.make_order_recommendation(ticker))
-    crypto_bot.trade()
+    robinhood.login(username=ROBINHOOD_USER, password=ROBINHOOD_PASS)
 
 def main():
     robinhood_login()
 
-    stock_trade_list = ['AAPL', 'ENPH']
-    crypto_trade_list = ['BTC', 'DOGE']
+    # stock_trade_list = ['AAPL', 'ENPH']
+    # crypto_trade_list = ['BTC', 'DOGE']
 
-    my_holdings = robinhood.account.build_holdings()
-    my_holding_in_ticker = my_holdings['AMZN']
-    quantity_in_ticker = my_holding_in_ticker['quantity']
-    order = robinhood.orders.order_sell_fractional_by_quantity('AMZN', quantity_in_ticker)
-    print(order)
+    # tradebot = trade_bot.TradeBot(stock_trade_list)
+    # order = tradebot.liquidate_portfolio()
+
+    auth = tweepy.AppAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+
+    api = tweepy.API(auth)
+
+    tweet_count = 10000
+    query = robinhood.stocks.get_name_by_symbol('FB')
+    public_tweets = api.search(q=query, lang='en', count=tweet_count)
+    print(public_tweets[31].text)
+
+    analyzer = SentimentIntensityAnalyzer()
+
+    tweet_sentiments = {'Tweet' : [], 'Score': [], 'Sentiment': []}
+
+    for tweet in public_tweets:
+        score = analyzer.polarity_scores(tweet.text)['compound']
+        if score >= 0.05:
+            sentiment = 'POSITIVE'
+        elif score <= -0.05:
+            sentiment = 'NEGATIVE'
+        else:
+            sentiment = 'NEUTRAL'
+
+        tweet_sentiments['Tweet'].append(tweet.text)
+        tweet_sentiments['Score'].append(score)
+        tweet_sentiments['Sentiment'].append(sentiment)
+
+    tweet_sentiments_df = pd.DataFrame(tweet_sentiments)
+
+    print(tweet_sentiments_df[4])
 
 if __name__ == "__main__":
     main()

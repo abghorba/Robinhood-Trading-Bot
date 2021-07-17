@@ -1,6 +1,10 @@
-import robin_stocks.robinhood as robinhood
+from config import ROBINHOOD_USER, ROBINHOOD_PASS, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+
 import pandas as pd
-import time
+import robin_stocks.robinhood as robinhood
+import tweepy
+
 
 class TradeBot():
     def __init__(self, trade_list=[]):
@@ -13,7 +17,17 @@ class TradeBot():
 
         """
         self.trade_list = trade_list
-    
+        # self.robinhood_login()
+
+    def robinhood_login(self):
+        """
+        Logs user into their Robinhood account.
+
+        :returns: None
+
+        """
+        robinhood.login(username=ROBINHOOD_USER, password=ROBINHOOD_PASS)
+
     def update_trade_list(self, new_trade_list):
         """
         Updates the current trade list.
@@ -80,9 +94,10 @@ class TradeBot():
         """
         portfolio = robinhood.account.build_holdings()
 
-        for position in portfolio:
+        for ticker, position in portfolio.items():
             equity = float(position['equity'])
-            robinhood.orders.order_sell_fractional_by_price(position, 
+            print(ticker, equity)
+            robinhood.orders.order_sell_fractional_by_price(ticker, 
                                                             equity,
                                                             timeInForce='gfd',
                                                             extendedHours=False,
@@ -156,7 +171,7 @@ class TradeBot():
         else:
             return False
 
-    def trade(self, amount_in_dollars = 1):
+    def trade(self, amount_in_dollars = 1.00):
         """
         Places buy/sell orders for fractional shares of stock.
 
@@ -198,6 +213,22 @@ class TradeBotVWAP(TradeBot):
     def __init__(self, trade_list):
         TradeBot.__init__(self, trade_list)
 
+    def calculate_VWAP(self, stock_history_df):
+        """
+        Calculates the Volume-Weighted Average Price (VWAP).
+
+        :param stock_history_df: DataFrame with stock price history,
+        :type stock_history_df: DataFrame
+        :returns: float
+
+        """
+        sum_of_volumes = stock_history_df['volume'].sum()
+        sum_of_prices_times_volumes = stock_history_df['volume'].dot(stock_history_df['close_price'])
+        vwap = round(sum_of_prices_times_volumes / sum_of_volumes, 2)
+
+        return vwap
+
+
     def make_order_recommendation(self, symbol, buy_threshold=0, sell_threshold=0):
         """
         Makes a recommendation for a market order by comparing
@@ -218,9 +249,7 @@ class TradeBotVWAP(TradeBot):
         stock_history_df['volume'] = pd.to_numeric(stock_history_df['volume'], errors='coerce')
 
         #Calculate the VWAP from the last day in 5 minute intervals.
-        sum_of_volumes = stock_history_df['volume'].sum()
-        sum_of_prices_times_volumes = stock_history_df['volume'].dot(stock_history_df['close_price'])
-        vwap = round(sum_of_prices_times_volumes / sum_of_volumes, 2)
+        vwap = self.calculate_VWAP(stock_history_df)
 
         #Get the current market price of the stock.
         current_price = float(robinhood.stocks.get_latest_price(symbol, includeExtendedHours=False)[0])
@@ -306,8 +335,86 @@ class TradeBotSentimentAnalysis(TradeBot):
     def __init__(self, trade_list):
         TradeBot.__init__(self, trade_list)
     
-    def make_order_recommendation(self, symbol):
-        pass
+
+    def retrieve_tweets(self, ticker):
+        """
+        Determines if a score is positive, negative, or neutral.
+
+        :param ticker: A ticker symbol.
+        :type ticker: str
+        :returns: SearchResults
+
+        """
+        consumer_key = TWITTER_CONSUMER_KEY
+        consumer_secret = TWITTER_CONSUMER_SECRET
+
+        auth = tweepy.AppAuthHandler(consumer_key, consumer_secret)
+
+        api = tweepy.API(auth)
+
+        query = robinhood.stocks.get_name_by_symbol(ticker)
+        public_tweets = api.search(q=query, lang='en', count=1000)
+
+        return public_tweets
+    
+
+    def analyze_tweet_sentiments(self, tweets):
+        """
+        Determines the general consensus on the opinion of the tweets.
+
+        :param tweet: A single tweet or SearchResults object of tweets.
+        :type tweet: str or SearchResults
+        :returns: DataFrame
+
+        """
+        analyzer = SentimentIntensityAnalyzer()
+
+        tweet_sentiments = {'Tweet' : [], 'Score': [], 'Sentiment': []}
+
+        for tweet in tweets:
+            score = analyzer.polarity_scores(tweet.text)['compound']
+            sentiment = self.determine_sentiment(score)
+
+            tweet_sentiments['Tweet'].append(tweet.text)
+            tweet_sentiments['Score'].append(score)
+            tweet_sentiments['Sentiment'].append(sentiment)
+
+        tweet_sentiments_df = pd.DataFrame(tweet_sentiments)
+
+        return tweet_sentiments_df
+
+
+    def determine_sentiment(self, score):
+        """
+        Determines if a score is positive, negative, or neutral.
+
+        :param score: A sentiment score.
+        :type score: float
+        :returns: str
+
+        """
+        if score >= 0.05:
+            return 'POSITIVE'
+        elif score <= -0.05:
+            return 'NEGATIVE'
+        else:
+            return 'NEUTRAL'
+
+
+    def make_order_recommendation(self, ticker):
+        """
+        Makes an order recommendation based on the sentiment of
+        1,000 tweets.
+
+        :param ticker: A ticker symbol.
+        :type ticker: str
+        :returns: str
+
+        """
+        public_tweets = self.retrieve_tweets(ticker)
+
+        
+        return None
 
 
 class TradeBotCrypto(TradeBot):
@@ -438,4 +545,3 @@ class TradeBotCryptoSentimentAnalysis(TradeBotCrypto):
 
     def make_order_recommendation(self, symbol):
         pass
-
