@@ -2,7 +2,6 @@ from config import ROBINHOOD_USER, ROBINHOOD_PASS
 from pandas.core.frame import DataFrame
 from tweepy.models import SearchResults
 
-import pytest
 import pandas as pd
 import robin_stocks.robinhood as robinhood
 import trade_bot
@@ -122,20 +121,3 @@ class TestTradeBotSentimentAnalysis():
         assert test_bot.determine_sentiment(-0.33) == 'NEGATIVE'
         assert test_bot.determine_sentiment(-0.02) == 'NEUTRAL'
         assert test_bot.determine_sentiment(0.03) == 'NEUTRAL'
-
-
-class TestTradeBotCrypto():    
-    def test_get_current_trade_list(self):
-        test_bot = trade_bot.TradeBotCrypto(sample_crypto_list)
-        assert test_bot.get_current_trade_list() == sample_crypto_list
-    
-    def test_update_trade_list(self):
-        test_bot = trade_bot.TradeBotCrypto(sample_crypto_list)
-        test_bot.update_trade_list(sample_crypto_list2)
-        assert test_bot.get_current_trade_list() == sample_crypto_list2
-
-    def test_make_order_recommendation(self):
-        pass
-    
-    def test_trade(self):
-        pass

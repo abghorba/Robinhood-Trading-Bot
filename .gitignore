@@ -4,3 +4,4 @@ env/
 .vscode/
 config.py
 main.py
+crypto_bot.py
