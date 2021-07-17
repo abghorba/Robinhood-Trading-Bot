@@ -28,6 +28,7 @@ class TradeBot():
         """
         robinhood.login(username=ROBINHOOD_USER, password=ROBINHOOD_PASS)
 
+
     def update_trade_list(self, new_trade_list):
         """
         Updates the current trade list.
@@ -39,6 +40,7 @@ class TradeBot():
         """
         self.trade_list = new_trade_list
 
+
     def get_current_trade_list(self):
         """
         Returns the current trade list.
@@ -48,6 +50,7 @@ class TradeBot():
         """
 
         return self.trade_list
+
 
     def buy_with_available_funds(self, ticker):
         """
@@ -65,6 +68,7 @@ class TradeBot():
                                                               timeInForce='gfd', 
                                                               extendedHours=False,
                                                               jsonify=True)
+
 
     def sell_entire_position(self, ticker):
         """
@@ -92,11 +96,12 @@ class TradeBot():
         :return: None
         
         """
+        # Get portfolio.
         portfolio = robinhood.account.build_holdings()
 
+        # Sell each position in the portfolio.
         for ticker, position in portfolio.items():
             equity = float(position['equity'])
-            print(ticker, equity)
             robinhood.orders.order_sell_fractional_by_price(ticker, 
                                                             equity,
                                                             timeInForce='gfd',
@@ -104,37 +109,17 @@ class TradeBot():
                                                             jsonify=True)
 
 
-    def make_order_recommendation(self, symbol):
+    def make_order_recommendation(self, ticker):
         """
-        Makes a recommendation for a market order by comparing
-        the 50-day moving average to the 200-day moving average.
-        Returns 'b' for buy, 's' for sell, or 'x' for neither.
+        For the base class, always returns an 'x'.
 
-        :param symbol: A ticker symbol.
-        :type symbol: str
-        :returns: A string with the order recommendation.
+        :param ticker: A ticker symbol.
+        :type ticker: str
+        :returns: str
 
         """
-        stock_history = robinhood.stocks.get_stock_historicals(symbol, 
-                                                               interval='day', 
-                                                               span='year' )
-        stock_history_df = pd.DataFrame(stock_history)
-        stock_history_df['close_price'] = pd.to_numeric(stock_history_df['close_price'], errors='coerce')
-
-        #Calculate the 200-day moving average.
-        stock_200_day_history = stock_history_df.tail(200)
-        moving_average_200_day = stock_200_day_history['close_price'].mean()
-
-        #Calculate the 50-day moving average.
-        stock_50_day_history = stock_history_df.tail(50)
-        moving_average_50_day = stock_50_day_history['close_price'].mean()
-
-        if moving_average_50_day > moving_average_200_day:
-            return 'b'
-        elif moving_average_50_day < moving_average_200_day:
-            return 's'
-        else:
-            return 'x'
+        return 'x'
+ 
 
     def has_sufficient_funds_available(self, amount_in_dollars):
         """
@@ -146,9 +131,11 @@ class TradeBot():
         :returns: bool
 
         """
+        # Retrieve the available funds.
         available_funds = float(robinhood.profiles.load_account_profile(info="buying_power"))
 
         return available_funds >= amount_in_dollars
+
 
     def has_sufficient_equity(self, symbol, amount_in_dollars):
         """
@@ -171,6 +158,7 @@ class TradeBot():
         else:
             return False
 
+
     def trade(self, amount_in_dollars = 1.00):
         """
         Places buy/sell orders for fractional shares of stock.
@@ -180,37 +168,97 @@ class TradeBot():
         :returns: None
 
         """
-        for symbol in self.trade_list:
-            action = self.make_order_recommendation(symbol)
+        for ticker in self.trade_list:
+            action = self.make_order_recommendation(ticker)
 
             if action == 'b':
                 if self.has_sufficient_funds_available(amount_in_dollars):
-                    print(f"Buying ${amount_in_dollars} of {symbol}...")
-                    robinhood.orders.order_buy_fractional_by_price(symbol, 
+                    print(f"Buying ${amount_in_dollars} of {ticker}...")
+                    robinhood.orders.order_buy_fractional_by_price(ticker, 
                                                                    amount_in_dollars, 
                                                                    timeInForce='gfd', 
                                                                    extendedHours=False,
                                                                    jsonify=True)
-                    print(f"Successfully bought ${amount_in_dollars} of {symbol}.")
+                    print(f"Successfully bought ${amount_in_dollars} of {ticker}.")
                 else:
-                    print(f"Sufficient funds are not available for the purchase of {symbol}.") 
+                    print(f"Sufficient funds are not available for the purchase of {ticker}.") 
             elif action == 's':
-                if self.has_sufficient_equity(symbol, amount_in_dollars):
-                    print(f"Selling ${amount_in_dollars} of {symbol}...")
-                    robinhood.orders.order_sell_fractional_by_price(symbol, 
+                if self.has_sufficient_equity(ticker, amount_in_dollars):
+                    print(f"Selling ${amount_in_dollars} of {ticker}...")
+                    robinhood.orders.order_sell_fractional_by_price(ticker, 
                                                                     amount_in_dollars, 
                                                                     timeInForce='gfd', 
                                                                     extendedHours=False,
                                                                     jsonify=True)
-                    print(f"Successfully sold ${amount_in_dollars} of {symbol}.")
+                    print(f"Successfully sold ${amount_in_dollars} of {ticker}.")
                 else:
-                    print(f"Sufficient equity is not available for the sale of {symbol}.")
+                    print(f"Sufficient equity is not available for the sale of {ticker}.")
             else:
-                print(f"Conditions are not met for either a purchase or a sale of {symbol}.")         
+                print(f"Conditions are not met for either a purchase or a sale of {ticker}.")         
+
+
+class TradeBotSimpleMovingAverage(TradeBot):
+    def __init__(self, trade_list=[]):
+        TradeBot.__init__(self, trade_list)
+
+
+    def calculate_simple_moving_average(self, stock_history_df, number_of_days):
+        """
+        Calculates the simple moving average based on the number of days.
+
+        :param stock_history_df: DataFrame containing stock history.
+        :type stock_history_df: DataFrame
+        :param number_of_days: Number of days to calculate the moving average.
+        :type number_of_days: int
+        :returns: A string with the order recommendation.
+
+        """
+        # Typecast the column to numerics.
+        stock_history_df['close_price'] = pd.to_numeric(stock_history_df['close_price'], errors='coerce')
+
+        # Consider only the last n days.
+        n_day_stock_history = stock_history_df.tail(number_of_days)
+
+        # Calculate the moving average.
+        n_day_moving_average = round(n_day_stock_history['close_price'].mean(), 2)
+
+        return n_day_moving_average
+
+
+    def make_order_recommendation(self, ticker):
+        """
+        Makes a recommendation for a market order by comparing
+        the 50-day moving average to the 200-day moving average.
+        Returns 'b' for buy, 's' for sell, or 'x' for neither.
+
+        :param ticker: A ticker symbol.
+        :type ticker: str
+        :returns: A string with the order recommendation.
+
+        """
+        # Construct a DataFrame with the stock history.
+        stock_history = robinhood.stocks.get_stock_historicals(ticker, 
+                                                               interval='day', 
+                                                               span='year' )
+        stock_history_df = pd.DataFrame(stock_history)
+
+        # Calculate the 200-day moving average.
+        moving_average_200_day = self.calculate_simple_moving_average(stock_history_df, 200)
+
+        # Calculate the 50-day moving average.
+        moving_average_50_day = self.calculate_simple_moving_average(stock_history_df, 200)
+
+        # Determine the order recommendation.
+        if moving_average_50_day > moving_average_200_day:
+            return 'b'
+        elif moving_average_50_day < moving_average_200_day:
+            return 's'
+        else:
+            return 'x'
 
 
 class TradeBotVWAP(TradeBot):
-    def __init__(self, trade_list):
+    def __init__(self, trade_list=[]):
         TradeBot.__init__(self, trade_list)
 
     def calculate_VWAP(self, stock_history_df):
@@ -222,38 +270,45 @@ class TradeBotVWAP(TradeBot):
         :returns: float
 
         """
+        # Typecast the columns we need.
+        stock_history_df['close_price'] = pd.to_numeric(stock_history_df['close_price'], errors='coerce')
+        stock_history_df['volume'] = pd.to_numeric(stock_history_df['volume'], errors='coerce')
+
+        # Sum the volumes, and take the dot product of the volume and close_price columns.
         sum_of_volumes = stock_history_df['volume'].sum()
         sum_of_prices_times_volumes = stock_history_df['volume'].dot(stock_history_df['close_price'])
+
+        # Calculate the average.
         vwap = round(sum_of_prices_times_volumes / sum_of_volumes, 2)
 
         return vwap
 
 
-    def make_order_recommendation(self, symbol, buy_threshold=0, sell_threshold=0):
+    def make_order_recommendation(self, ticker, buy_threshold=0, sell_threshold=0):
         """
         Makes a recommendation for a market order by comparing
         the Volume-Weighted Average Price (VWAP) to the current
         market price.
         Returns 'b' for buy, 's' for sell, or 'x' for neither.
 
-        :param symbol: A ticker symbol.
-        :type symbol: str
+        :param ticker: A ticker symbol.
+        :type ticker: str
         :returns: A string with the order recommendation.
 
         """
-        stock_history = robinhood.stocks.get_stock_historicals(symbol, 
+        # Retrieve the stock history and place into a DataFrame.
+        stock_history = robinhood.stocks.get_stock_historicals(ticker, 
                                                                interval='5minute', 
                                                                span='day' )
         stock_history_df = pd.DataFrame(stock_history)
-        stock_history_df['close_price'] = pd.to_numeric(stock_history_df['close_price'], errors='coerce')
-        stock_history_df['volume'] = pd.to_numeric(stock_history_df['volume'], errors='coerce')
 
-        #Calculate the VWAP from the last day in 5 minute intervals.
+        # Calculate the VWAP from the last day in 5 minute intervals.
         vwap = self.calculate_VWAP(stock_history_df)
 
-        #Get the current market price of the stock.
-        current_price = float(robinhood.stocks.get_latest_price(symbol, includeExtendedHours=False)[0])
+        # Get the current market price of the stock.
+        current_price = float(robinhood.stocks.get_latest_price(ticker, includeExtendedHours=False)[0])
 
+        # Determine the order recommendation.
         if current_price < vwap + buy_threshold:
             return 'b'
         elif current_price > vwap + sell_threshold:
@@ -263,7 +318,7 @@ class TradeBotVWAP(TradeBot):
 
 
 class TradeBotPairsTrading(TradeBot):
-    def __init__(self, trade_list):
+    def __init__(self, trade_list=[]):
         TradeBot.__init__(self, trade_list)
 
     def make_order_recommendation(self, ticker_1, ticker_2):
@@ -332,17 +387,17 @@ class TradeBotPairsTrading(TradeBot):
 
 
 class TradeBotSentimentAnalysis(TradeBot):
-    def __init__(self, trade_list):
+    def __init__(self, trade_list=[]):
         TradeBot.__init__(self, trade_list)
     
 
     def retrieve_tweets(self, ticker):
         """
-        Determines if a score is positive, negative, or neutral.
+        Retrieves tweets from Twitter about ticker.
 
         :param ticker: A ticker symbol.
         :type ticker: str
-        :returns: SearchResults
+        :returns: list
 
         """
         consumer_key = TWITTER_CONSUMER_KEY
@@ -353,40 +408,50 @@ class TradeBotSentimentAnalysis(TradeBot):
         api = tweepy.API(auth)
 
         query = robinhood.stocks.get_name_by_symbol(ticker)
-        public_tweets = api.search(q=query, lang='en', count=1000)
 
-        return public_tweets
+        max_count = 1000
+        public_tweets = tweepy.Cursor(api.search, q=query, lang='en', tweet_mode = 'extended').items(max_count)
+
+        searched_tweets = []
+        for tweet in public_tweets:
+            try:
+                searched_tweets.append(tweet.retweeted_status.full_text)
+            except AttributeError:  # Not a Retweet
+                searched_tweets.append(tweet.full_text)
+
+        return searched_tweets
     
 
     def analyze_tweet_sentiments(self, tweets):
         """
-        Determines the general consensus on the opinion of the tweets.
+        Analyzes the sentiments of each tweet and returns the average
+        sentiment.
 
-        :param tweet: A single tweet or SearchResults object of tweets.
-        :type tweet: str or SearchResults
-        :returns: DataFrame
+        :param tweet: A single tweet or list of tweets.
+        :type tweet: str or list
+        :returns: float
 
         """
         analyzer = SentimentIntensityAnalyzer()
 
-        tweet_sentiments = {'Tweet' : [], 'Score': [], 'Sentiment': []}
+        tweet_sentiments = {'tweet' : [], 'sentiment_score': []}
 
         for tweet in tweets:
-            score = analyzer.polarity_scores(tweet.text)['compound']
-            sentiment = self.determine_sentiment(score)
+            score = analyzer.polarity_scores(tweet)['compound']
 
-            tweet_sentiments['Tweet'].append(tweet.text)
-            tweet_sentiments['Score'].append(score)
-            tweet_sentiments['Sentiment'].append(sentiment)
+            tweet_sentiments['tweet'].append(tweet)
+            tweet_sentiments['sentiment_score'].append(score)
 
         tweet_sentiments_df = pd.DataFrame(tweet_sentiments)
 
-        return tweet_sentiments_df
+        average_sentiment_score = tweet_sentiments_df['sentiment_score'].mean()
+
+        return average_sentiment_score
 
 
     def determine_sentiment(self, score):
         """
-        Determines if a score is positive, negative, or neutral.
+        Determines if the general sentiment score is positive, negative, or neutral.
 
         :param score: A sentiment score.
         :type score: float
@@ -404,7 +469,7 @@ class TradeBotSentimentAnalysis(TradeBot):
     def make_order_recommendation(self, ticker):
         """
         Makes an order recommendation based on the sentiment of
-        1,000 tweets.
+        20,000 tweets about ticker.
 
         :param ticker: A ticker symbol.
         :type ticker: str
@@ -412,7 +477,11 @@ class TradeBotSentimentAnalysis(TradeBot):
 
         """
         public_tweets = self.retrieve_tweets(ticker)
+        consensus = self.analyze_tweet_sentiments(public_tweets)
 
-        
-        return None
-
+        if consensus == 'POSITIVE':
+            return 'b'
+        elif consensus == 'NEGATIVE':
+            return 's'
+        else:
+            return 'x'
