@@ -340,6 +340,7 @@ class TradeBotPairsTrading(TradeBot):
         :returns: A string with the order recommendation.
 
         """
+        # Get the current prices of both tickers.
         current_price_of_ticker_1 = float(robinhood.stocks.get_latest_price(ticker_1, includeExtendedHours=False)[0])
         current_price_of_ticker_2 = float(robinhood.stocks.get_latest_price(ticker_2, includeExtendedHours=False)[0])
 
@@ -400,18 +401,20 @@ class TradeBotSentimentAnalysis(TradeBot):
         :returns: list
 
         """
+        # Connect to the Twitter API.
         consumer_key = TWITTER_CONSUMER_KEY
         consumer_secret = TWITTER_CONSUMER_SECRET
-
         auth = tweepy.AppAuthHandler(consumer_key, consumer_secret)
-
         api = tweepy.API(auth)
 
+        # Retrieve the company name represented by ticker.
         query = robinhood.stocks.get_name_by_symbol(ticker)
 
+        # Use the API to search for 1,000 tweets mentioning the company the ticker represents.
         max_count = 1000
         public_tweets = tweepy.Cursor(api.search, q=query, lang='en', tweet_mode = 'extended').items(max_count)
 
+        # Extract the text body of each tweet.
         searched_tweets = []
         for tweet in public_tweets:
             try:
@@ -434,16 +437,18 @@ class TradeBotSentimentAnalysis(TradeBot):
         """
         analyzer = SentimentIntensityAnalyzer()
 
-        tweet_sentiments = {'tweet' : [], 'sentiment_score': []}
+        # Initialize an empty DataFrame.
+        column_names = ['tweet', 'sentiment_score']
+        tweet_sentiments_df = pd.DataFrame(columns=column_names)
 
+        # Get the sentiment score for each tweet and append the text
+        # and sentiment_score into the DataFrame.
         for tweet in tweets:
             score = analyzer.polarity_scores(tweet)['compound']
+            tweet_sentiment = {'tweet': tweet, 'setiment_score': score}
+            tweet_sentiments_df = tweet_sentiments_df.append(tweet_sentiment, ignore_index=True)
 
-            tweet_sentiments['tweet'].append(tweet)
-            tweet_sentiments['sentiment_score'].append(score)
-
-        tweet_sentiments_df = pd.DataFrame(tweet_sentiments)
-
+        # Calculate the average sentiment score.
         average_sentiment_score = tweet_sentiments_df['sentiment_score'].mean()
 
         return average_sentiment_score
