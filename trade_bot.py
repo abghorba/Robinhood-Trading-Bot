@@ -7,7 +7,7 @@ import tweepy
 
 
 class TradeBot():
-    def __init__(self, trade_list=[]):
+    def __init__(self, trade_list):
         """
         Constructs the TradeBot object with the trade list.
 
@@ -16,8 +16,12 @@ class TradeBot():
         :returns: None
 
         """
+        if trade_list is None:
+            trade_list = []
+
         self.trade_list = trade_list
         # self.robinhood_login()
+
 
     def robinhood_login(self):
         """
@@ -198,7 +202,9 @@ class TradeBot():
 
 
 class TradeBotSimpleMovingAverage(TradeBot):
-    def __init__(self, trade_list=[]):
+    def __init__(self, trade_list):
+        if trade_list is None:
+            trade_list = []
         TradeBot.__init__(self, trade_list)
 
 
@@ -258,7 +264,9 @@ class TradeBotSimpleMovingAverage(TradeBot):
 
 
 class TradeBotVWAP(TradeBot):
-    def __init__(self, trade_list=[]):
+    def __init__(self, trade_list):
+        if trade_list is None:
+            trade_list = []
         TradeBot.__init__(self, trade_list)
 
     def calculate_VWAP(self, stock_history_df):
@@ -318,7 +326,9 @@ class TradeBotVWAP(TradeBot):
 
 
 class TradeBotPairsTrading(TradeBot):
-    def __init__(self, trade_list=[]):
+    def __init__(self, trade_list):
+        if trade_list is None:
+            trade_list = []
         TradeBot.__init__(self, trade_list)
 
     def make_order_recommendation(self, ticker_1, ticker_2):
@@ -388,7 +398,9 @@ class TradeBotPairsTrading(TradeBot):
 
 
 class TradeBotSentimentAnalysis(TradeBot):
-    def __init__(self, trade_list=[]):
+    def __init__(self, trade_list):
+        if trade_list is None:
+            trade_list = []
         TradeBot.__init__(self, trade_list)
     
 
