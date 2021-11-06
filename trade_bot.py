@@ -324,7 +324,7 @@ class TradeBotSimpleMovingAverage(TradeBot):
         -------
         n_day_moving_average : float
             The simple moving average for n days.
-            
+
         """
         # Typecast the column to numerics.
         stock_history_df['close_price'] = pd.to_numeric(stock_history_df['close_price'], errors='coerce')
@@ -382,12 +382,17 @@ class TradeBotVWAP(TradeBot):
         TradeBot.__init__(self, trade_list)
 
     def calculate_VWAP(self, stock_history_df):
-        """
-        Calculates the Volume-Weighted Average Price (VWAP).
+        """Calculates the Volume-Weighted Average Price (VWAP).
 
-        :param stock_history_df: DataFrame with stock price history,
-        :type stock_history_df: DataFrame
-        :returns: float
+        Parameters
+        ----------
+        stock_history_df : pandas.DataFrame
+            DataFrame containing the stock's history.
+
+        Returns
+        -------
+        vwap : float
+            The calculated Volume-Weighted Average Price.
 
         """
         # Typecast the columns we need.
@@ -396,24 +401,29 @@ class TradeBotVWAP(TradeBot):
 
         # Sum the volumes, and take the dot product of the volume and close_price columns.
         sum_of_volumes = stock_history_df['volume'].sum()
-        sum_of_prices_times_volumes = stock_history_df['volume'].dot(stock_history_df['close_price'])
+        dot_product_volumes_and_prices = stock_history_df['volume'].dot(stock_history_df['close_price'])
 
         # Calculate the average.
-        vwap = round(sum_of_prices_times_volumes / sum_of_volumes, 2)
+        vwap = round(dot_product_volumes_and_prices / sum_of_volumes, 2)
 
         return vwap
 
 
     def make_order_recommendation(self, ticker, buy_threshold=0, sell_threshold=0):
-        """
-        Makes a recommendation for a market order by comparing
+        """Makes a recommendation for a market order by comparing
         the Volume-Weighted Average Price (VWAP) to the current
         market price.
-        Returns 'b' for buy, 's' for sell, or 'x' for neither.
 
-        :param ticker: A ticker symbol.
-        :type ticker: str
-        :returns: A string with the order recommendation.
+        Parameters
+        ----------
+        ticker : str
+            A company's ticker symbol.
+
+        Returns
+        -------
+        str
+            A string with the order recommendation. Returns 
+            'buy', 'sell', or None.
 
         """
         # Retrieve the stock history and place into a DataFrame.
@@ -430,11 +440,11 @@ class TradeBotVWAP(TradeBot):
 
         # Determine the order recommendation.
         if current_price < vwap + buy_threshold:
-            return 'b'
+            return 'buy'
         elif current_price > vwap + sell_threshold:
-            return 's'
+            return 'sell'
         else:
-            return 'x'
+            return None
 
 
 class TradeBotPairsTrading(TradeBot):
@@ -444,8 +454,7 @@ class TradeBotPairsTrading(TradeBot):
         TradeBot.__init__(self, trade_list)
 
     def make_order_recommendation(self, ticker_1, ticker_2):
-        """
-        Makes a recommendation for a market order by comparing
+        """Makes a recommendation for a market order by comparing
         the prices of two closely related securities.
         Returns:
         'b' if the price of ticker_1 is greater than ticker_2
@@ -455,11 +464,21 @@ class TradeBotPairsTrading(TradeBot):
         's' means sell ticker_1 and buy ticker_2.
         'x' means sell both ticker_1 and ticker_2.
 
-        :param ticker_1: A ticker symbol.
-        :param ticker_2: The ticker symbol to compare to.
-        :type ticker: str
-        :type ticker_2: str
-        :returns: A string with the order recommendation.
+        Parameters
+        ----------
+        ticker_1 : str
+            First company's ticker symbol.
+        ticker_2 : str
+            Second company's ticker symbol.     
+
+        Returns
+        -------
+        str
+            A string with the order recommendation. Returns 
+            'buy', 'sell', or None.
+            'buy' : buy ticker_1 and sell ticker_2.
+            'sell' : sell ticker_1 and buy ticker_2.
+             None :  sell both ticker_1 and ticker_2.
 
         """
         # Get the current prices of both tickers.
@@ -469,11 +488,12 @@ class TradeBotPairsTrading(TradeBot):
         price_difference = current_price_of_ticker_1 - current_price_of_ticker_2
 
         if price_difference > 0:
-            return 'b'
+            return 'buy'
         elif price_difference < 0:
-            return 's'
+            return 'sell'
         else:
-            return 'x'
+            return None
+
 
     def trade(self):
         """
@@ -489,14 +509,14 @@ class TradeBotPairsTrading(TradeBot):
             ticker_2 = ticker_pairs[1]
             action = self.make_order_recommendation(ticker_1, ticker_2)
 
-            if action == 'b':
+            if action == 'buy':
                 # Sell position in ticker_2                                             
                 self.sell_entire_position(ticker_2)
 
                 # Buy ticker_1 with all available funds
                 self.buy_with_available_funds(ticker_1)
 
-            elif action == 's':
+            elif action == 'sell':
                 # Sell position in ticker_1
                 self.sell_entire_position(ticker_1)
 
@@ -516,13 +536,18 @@ class TradeBotSentimentAnalysis(TradeBot):
         TradeBot.__init__(self, trade_list)
     
 
-    def retrieve_tweets(self, ticker):
-        """
-        Retrieves tweets from Twitter about ticker.
+    def retrieve_tweets(self, ticker, max_count=1000):
+        """Retrieves tweets from Twitter about ticker.
 
-        :param ticker: A ticker symbol.
-        :type ticker: str
-        :returns: list
+        Parameters
+        ----------
+        ticker : str
+            A company's ticker symbol.
+
+        Returns
+        -------
+        searched_tweets : list
+            A list of texts of the retrieved tweets.
 
         """
         # Connect to the Twitter API.
@@ -534,8 +559,7 @@ class TradeBotSentimentAnalysis(TradeBot):
         # Retrieve the company name represented by ticker.
         query = robinhood.stocks.get_name_by_symbol(ticker)
 
-        # Use the API to search for 1,000 tweets mentioning the company the ticker represents.
-        max_count = 1000
+        # Search for max_counts tweets mentioning the company.
         public_tweets = tweepy.Cursor(api.search, q=query, lang='en', tweet_mode = 'extended').items(max_count)
 
         # Extract the text body of each tweet.
@@ -550,13 +574,19 @@ class TradeBotSentimentAnalysis(TradeBot):
     
 
     def analyze_tweet_sentiments(self, tweets):
-        """
-        Analyzes the sentiments of each tweet and returns the average
+        """Analyzes the sentiments of each tweet and returns the average
         sentiment.
 
-        :param tweet: A single tweet or list of tweets.
-        :type tweet: str or list
-        :returns: float
+        Parameters
+        ----------
+        tweets: list
+            A list of the text from tweets.
+
+        Returns
+        -------
+        average_sentiment_score : float
+            The mean of all the sentiment scores from
+            the list of tweets.
 
         """
         analyzer = SentimentIntensityAnalyzer()
@@ -569,7 +599,7 @@ class TradeBotSentimentAnalysis(TradeBot):
         # and sentiment_score into the DataFrame.
         for tweet in tweets:
             score = analyzer.polarity_scores(tweet)['compound']
-            tweet_sentiment = {'tweet': tweet, 'setiment_score': score}
+            tweet_sentiment = {'tweet': tweet, 'sentiment_score': score}
             tweet_sentiments_df = tweet_sentiments_df.append(tweet_sentiment, ignore_index=True)
 
         # Calculate the average sentiment score.
@@ -578,39 +608,28 @@ class TradeBotSentimentAnalysis(TradeBot):
         return average_sentiment_score
 
 
-    def determine_sentiment(self, score):
-        """
-        Determines if the general sentiment score is positive, negative, or neutral.
-
-        :param score: A sentiment score.
-        :type score: float
-        :returns: str
-
-        """
-        if score >= 0.05:
-            return 'POSITIVE'
-        elif score <= -0.05:
-            return 'NEGATIVE'
-        else:
-            return 'NEUTRAL'
-
-
     def make_order_recommendation(self, ticker):
-        """
-        Makes an order recommendation based on the sentiment of
+        """Makes an order recommendation based on the sentiment of
         20,000 tweets about ticker.
 
-        :param ticker: A ticker symbol.
-        :type ticker: str
-        :returns: str
+        Parameters
+        ----------
+        ticker : str
+            A company's ticker symbol.
 
+        Returns
+        -------
+        str
+            A string with the order recommendation. Returns 
+            'buy', 'sell', or None.
+            
         """
         public_tweets = self.retrieve_tweets(ticker)
-        consensus = self.analyze_tweet_sentiments(public_tweets)
+        consensus_score = self.analyze_tweet_sentiments(public_tweets)
 
-        if consensus == 'POSITIVE':
-            return 'b'
-        elif consensus == 'NEGATIVE':
-            return 's'
+        if consensus_score >= 0.05:
+            return 'buy'
+        elif consensus_score <= -0.05:
+            return 'sell'
         else:
-            return 'x'
+            return None
