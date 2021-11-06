@@ -11,194 +11,295 @@ class TradeBot():
         """
         Constructs the TradeBot object with the trade list.
 
-        :param trade_list: A list of ticker symbols.
-        :type trade_list: list
-        :returns: None
-
+        Parameters
+        ----------
+        trade_list : list
+            A list of companies' ticker symbols.
+        
+        Returns
+        -------
+        None
         """
         if trade_list is None:
             trade_list = []
-
         self.trade_list = trade_list
-        # self.robinhood_login()
 
 
     def robinhood_login(self):
-        """
-        Logs user into their Robinhood account.
+        """Logs user into their Robinhood account.
 
-        :returns: None
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
 
         """
         robinhood.login(username=ROBINHOOD_USER, password=ROBINHOOD_PASS)
 
 
     def update_trade_list(self, new_trade_list):
-        """
-        Updates the current trade list.
+        """Updates the current trade list.
 
-        :param new_trade_list: The list of ticker symbols to update to.
-        :type new_trade_list: list
-        :returns: None
+        Parameters
+        ----------
+        new_trade_list : list
+            A list containing companies' ticker symbols
+            that will update the current trade list.
+
+        Returns
+        -------
+        None
 
         """
         self.trade_list = new_trade_list
 
 
     def get_current_trade_list(self):
-        """
-        Returns the current trade list.
-
-        :returns: The current trade list as a list.
-
-        """
+        """Returns the current trade list."""
 
         return self.trade_list
 
 
-    def buy_with_available_funds(self, ticker):
-        """
-        Buys ticker with all available funds.
-
-        :param ticker: A ticker symbol.
-        :type ticker: str
-        :returns: A dictionary.
-
-        """
-        available_funds = float(robinhood.profiles.load_account_profile(info='buying_power'))
-
-        return robinhood.orders.order_buy_fractional_by_price(ticker, 
-                                                              available_funds,
-                                                              timeInForce='gfd', 
-                                                              extendedHours=False,
-                                                              jsonify=True)
-
-
-    def sell_entire_position(self, ticker):
-        """
-        Sells entire position in ticker.
-
-        :param ticker: A ticker symbol.
-        :type ticker: str
-        :returns: A dictionary.
-
-        """
-        portfolio = robinhood.account.build_holdings()
-        position = portfolio[ticker]
-        equity = float(position['equity'])
-
-        return robinhood.orders.order_sell_fractional_by_price(ticker, 
-                                                               equity,
-                                                               timeInForce='gfd',
-                                                               extendedHours=False,
-                                                               jsonify=True)
-
-    def liquidate_portfolio(self):
-        """
-        Completely liquidates all positions.
-
-        :return: None
-        
-        """
-        # Get portfolio.
-        portfolio = robinhood.account.build_holdings()
-
-        # Sell each position in the portfolio.
-        for ticker, position in portfolio.items():
-            equity = float(position['equity'])
-            robinhood.orders.order_sell_fractional_by_price(ticker, 
-                                                            equity,
-                                                            timeInForce='gfd',
-                                                            extendedHours=False,
-                                                            jsonify=True)
-
-
-    def make_order_recommendation(self, ticker):
-        """
-        For the base class, always returns an 'x'.
-
-        :param ticker: A ticker symbol.
-        :type ticker: str
-        :returns: str
-
-        """
-        return 'x'
- 
-
     def has_sufficient_funds_available(self, amount_in_dollars):
-        """
-        Returns a boolean if user's account has enough buying power
-        to execute a buy order.
+        """Returns a boolean if user's account has enough buying
+        power to execute a buy order.
 
-        :param amount_in_dollars: The amount to transact with.
-        :type amount_in_dollars: float
-        :returns: bool
+        Parameters
+        ----------
+        amount_in_dollars : float
+            The amount in USD to be used for a transaction.
+
+        Returns
+        -------
+        bool
+            True if there are sufficient funds in user's account.
 
         """
+        # We cannot place an order with an amount less than 1.
+        if amount_in_dollars < 1:
+            return False
+
         # Retrieve the available funds.
         available_funds = float(robinhood.profiles.load_account_profile(info="buying_power"))
 
         return available_funds >= amount_in_dollars
 
 
-    def has_sufficient_equity(self, symbol, amount_in_dollars):
-        """
-        Returns a boolean if user's account has enough equity in
-        the given position to execute a sell order. If the user
-        does not own the position, returns a False.
+    def has_sufficient_equity(self, ticker, amount_in_dollars):
+        """Returns a boolean if user's account has enough equity in
+        the given position to execute a sell order.
 
-        :param symbol: A ticker symbol.
-        :param amount_in_dollars: The amount to transact with.
-        :type amount_in_dollars: float
-        :type symbol: str
-        :returns: bool
+        Parameters
+        ----------
+        ticker : str
+            A company's ticker symbol.
+        amount_in_dollars : float
+            The amount in USD to be used for a transaction.
+
+        Returns
+        -------
+        bool
+            True if there is sufficient equity in the user's holding.
 
         """
-        current_holdings = robinhood.build_holdings()
-        if symbol in current_holdings:
-            current_position = current_holdings[symbol]
-            current_equity_in_position = float(current_position['equity'])
-            return current_equity_in_position >= amount_in_dollars
-        else:
+        # We cannot place an order with an amount less than 1.
+        if amount_in_dollars < 1:
             return False
 
+        portfolio = robinhood.account.build_holdings()
+        if ticker in portfolio:
+            position = portfolio[ticker]
+            equity_in_position = float(position['equity'])
+            return equity_in_position >= amount_in_dollars
 
-    def trade(self, amount_in_dollars = 1.00):
+        return False
+
+
+    def place_buy_order(self, ticker, amount_in_dollars):
+        """Places a buy order for ticker with a specified amount.
+
+        Parameters
+        ----------
+        ticker : str
+            A company's ticker symbol.
+        amount_in_dollars : float
+            The amount in USD to be used for the purchase.
+        
+        Returns
+        -------
+        purchase_data : dict
+            Dictionary that contains information regarding the
+            purchase of stocks, such as the order id, the state
+            of order (queued, confired, filled, failed, canceled,
+            etc.), the price, and the quantity.
+
         """
-        Places buy/sell orders for fractional shares of stock.
+        purchase_data = {}
 
-        :param amount_in_dollars: The amount to transact with.
-        :type amount_in_dollars: float
-        :returns: None
+        # Must have enough funds for the purchase
+        if self.has_sufficient_funds_available(amount_in_dollars):
+            print(f"Buying ${amount_in_dollars} of {ticker}...")
+            purchase_data.update(robinhood.orders.order_buy_fractional_by_price(
+                ticker, amount_in_dollars, timeInForce='gfd', 
+                extendedHours=False, jsonify=True))
+            print(f"Successfully bought ${amount_in_dollars} of {ticker}.")
+
+        return purchase_data
+
+
+    def place_sell_order(self, ticker, amount_in_dollars):
+        """Places a sell order for ticker with a specified amount.
+
+        Parameters
+        ----------
+        ticker : str
+            A company's ticker symbol.
+        amount_in_dollars : float
+            The amount in USD to be used for the sale.
+        
+        Returns
+        -------
+        sale_data : dict
+            Dictionary that contains information regarding the 
+            sale of stocks, such as the order id, the state
+            of order (queued, confired, filled, failed, canceled,
+            etc.), the price, and the quantity.
 
         """
-        for ticker in self.trade_list:
-            action = self.make_order_recommendation(ticker)
+        sale_data = {}
 
-            if action == 'b':
-                if self.has_sufficient_funds_available(amount_in_dollars):
-                    print(f"Buying ${amount_in_dollars} of {ticker}...")
-                    robinhood.orders.order_buy_fractional_by_price(ticker, 
-                                                                   amount_in_dollars, 
-                                                                   timeInForce='gfd', 
-                                                                   extendedHours=False,
-                                                                   jsonify=True)
-                    print(f"Successfully bought ${amount_in_dollars} of {ticker}.")
-                else:
-                    print(f"Sufficient funds are not available for the purchase of {ticker}.") 
-            elif action == 's':
-                if self.has_sufficient_equity(ticker, amount_in_dollars):
-                    print(f"Selling ${amount_in_dollars} of {ticker}...")
-                    robinhood.orders.order_sell_fractional_by_price(ticker, 
-                                                                    amount_in_dollars, 
-                                                                    timeInForce='gfd', 
-                                                                    extendedHours=False,
-                                                                    jsonify=True)
-                    print(f"Successfully sold ${amount_in_dollars} of {ticker}.")
-                else:
-                    print(f"Sufficient equity is not available for the sale of {ticker}.")
-            else:
-                print(f"Conditions are not met for either a purchase or a sale of {ticker}.")         
+        # Must have enough equity for the sale
+        if self.has_sufficient_equity(ticker, amount_in_dollars):
+            print(f"Selling ${amount_in_dollars} of {ticker}...")
+            sale_data.update(robinhood.orders.order_sell_fractional_by_price(
+                ticker, amount_in_dollars, timeInForce='gfd', 
+                extendedHours=False, jsonify=True))
+            print(f"Successfully sold ${amount_in_dollars} of {ticker}.")
+
+        return sale_data
+
+
+    def buy_with_available_funds(self, ticker):
+        """Buys ticker with all available funds.
+
+        Parameters
+        ----------
+        ticker : str
+            A company's ticker symbol.
+
+        Returns
+        -------
+        dict
+            Dictionary that contains information regarding the
+            purchase of stocks, such as the order id, the state
+            of order (queued, confired, filled, failed, canceled,
+            etc.), the price, and the quantity.
+
+        """
+        available_funds = float(robinhood.profiles.load_account_profile(info='buying_power'))
+        return self.place_buy_order(ticker, available_funds)
+
+
+    def sell_entire_position(self, ticker):
+        """Sells user's entire position in ticker.
+
+        Parameters
+        ----------
+        ticker : str
+            A company's ticker symbol.
+
+        Returns
+        -------
+        dict
+            Dictionary that contains information regarding the 
+            sale of stocks, such as the order id, the state
+            of order (queued, confired, filled, failed, canceled,
+            etc.), the price, and the quantity.
+
+        """
+        portfolio = robinhood.account.build_holdings()
+        position = portfolio[ticker]
+        equity = float(position['equity'])
+        return self.place_sell_order(ticker, equity)
+
+
+    def liquidate_portfolio(self):
+        """Completely sells all positions held.
+        
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        compiled_sale_information : list
+            A list of dictionaries containing information
+            regarding the purchase of stocks, such as the
+            order id, the state of order (queued, confired,
+            filled, failed, canceled, etc.), the price, and
+            the quantity for each position held.
+
+        """
+        compiled_sale_information = []
+        portfolio = robinhood.account.build_holdings()
+        for ticker in portfolio.items():
+            sale_information = self.sell_entire_position(ticker)
+            compiled_sale_information.append(sale_information)
+        
+        return compiled_sale_information
+
+
+    def make_order_recommendation(self, ticker):
+        """Makes an order recommendation for the given ticker.
+
+        Parameters
+        ----------
+        ticker : str
+            A company's ticker symbol.
+        
+        Returns
+        -------
+        None
+
+        """
+        return None
+ 
+
+    def trade(self, ticker, amount_in_dollars):
+        """Places buy/sell orders for fractional shares of stock.
+
+        Parameters
+        ----------
+        ticker : str
+            A company's ticker symbol.
+        amount_in_dollars : float
+            The amount in USD to be used for a transaction.
+
+
+        Returns
+        -------
+        transaction_data : dict
+            Dictionary that contains information regarding the 
+            purchase/sale of stocks, such as the order id, the 
+            state of order (queued, confired, filled, failed,
+            canceled, etc.), the price, and the quantity.
+
+        """
+        transaction_data = {}
+
+        action = self.make_order_recommendation(ticker)
+
+        if action == 'buy':
+            transaction_data.update(self.place_buy_order(ticker, amount_in_dollars))
+        elif action == 'sell':
+            transaction_data.update(self.place_sell_order(ticker, amount_in_dollars))
+        else:
+            print(f"Conditions are not met for either a purchase or a sale of {ticker}.")
+
+        return transaction_data
 
 
 class TradeBotSimpleMovingAverage(TradeBot):
@@ -209,15 +310,21 @@ class TradeBotSimpleMovingAverage(TradeBot):
 
 
     def calculate_simple_moving_average(self, stock_history_df, number_of_days):
-        """
-        Calculates the simple moving average based on the number of days.
+        """Calculates the simple moving average based 
+        on the number of days.
 
-        :param stock_history_df: DataFrame containing stock history.
-        :type stock_history_df: DataFrame
-        :param number_of_days: Number of days to calculate the moving average.
-        :type number_of_days: int
-        :returns: A string with the order recommendation.
+        Parameters
+        ----------
+        stock_history_df : pandas.DataFrame
+            DataFrame containing the stock's history.
+        number_of_days : int
+            The number of days used to calculate the n-day moving average.
 
+        Returns
+        -------
+        n_day_moving_average : float
+            The simple moving average for n days.
+            
         """
         # Typecast the column to numerics.
         stock_history_df['close_price'] = pd.to_numeric(stock_history_df['close_price'], errors='coerce')
@@ -232,14 +339,19 @@ class TradeBotSimpleMovingAverage(TradeBot):
 
 
     def make_order_recommendation(self, ticker):
-        """
-        Makes a recommendation for a market order by comparing
+        """Makes a recommendation for a market order by comparing
         the 50-day moving average to the 200-day moving average.
-        Returns 'b' for buy, 's' for sell, or 'x' for neither.
 
-        :param ticker: A ticker symbol.
-        :type ticker: str
-        :returns: A string with the order recommendation.
+        Parameters
+        ----------
+        ticker : str
+            A company's ticker symbol.
+
+        Returns
+        -------
+        str
+            A string with the order recommendation. Returns 
+            'buy', 'sell', or None.
 
         """
         # Construct a DataFrame with the stock history.
@@ -252,15 +364,15 @@ class TradeBotSimpleMovingAverage(TradeBot):
         moving_average_200_day = self.calculate_simple_moving_average(stock_history_df, 200)
 
         # Calculate the 50-day moving average.
-        moving_average_50_day = self.calculate_simple_moving_average(stock_history_df, 200)
+        moving_average_50_day = self.calculate_simple_moving_average(stock_history_df, 50)
 
         # Determine the order recommendation.
         if moving_average_50_day > moving_average_200_day:
-            return 'b'
+            return 'buy'
         elif moving_average_50_day < moving_average_200_day:
-            return 's'
+            return 'sell'
         else:
-            return 'x'
+            return None
 
 
 class TradeBotVWAP(TradeBot):
