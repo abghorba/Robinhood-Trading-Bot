@@ -1,86 +1,146 @@
 from config import ROBINHOOD_USER, ROBINHOOD_PASS
-from pandas.core.frame import DataFrame
-from tweepy.models import SearchResults
 
 import pandas as pd
+import pytest
 import random
 import robin_stocks.robinhood as robinhood
-import trade_bot
+import time
+import trade_bot as tb
 
-sample_stock_list = ['AAPL', 'MSFT', 'AMZN']
-sample_stock_list2 = ['FB', 'GOOG', 'TSLA']
+@pytest.fixture(autouse=True)
+def slow_down_tests():
+    yield
+    time.sleep(3)
 
-robinhood.login(username=ROBINHOOD_USER, password=ROBINHOOD_PASS)
+class TestTradeBot():
+    trade_bot = tb.TradeBot()
 
-class TestTradeBot():    
-    def test_get_current_trade_list(self):
-        test_bot = trade_bot.TradeBot(sample_stock_list)
-        assert test_bot.get_current_trade_list() == sample_stock_list
-    
-
-    def test_update_trade_list(self):
-        test_bot = trade_bot.TradeBot(sample_stock_list)
-        test_bot.update_trade_list(sample_stock_list2)
-        assert test_bot.get_current_trade_list() == sample_stock_list2
+    def test_robinhood_login_is_successful(self):
+        login_data = self.trade_bot.robinhood_login(ROBINHOOD_USER, ROBINHOOD_PASS)
+        assert isinstance(login_data, dict)
+        assert len(login_data) > 0
 
 
-    def test_buy_with_available_funds(self):
-        test_bot = trade_bot.TradeBot()
-        available_funds = float(robinhood.profiles.load_account_profile(info='buying_power'))
+    # The test account has been initialized with $5.15.
+    @pytest.mark.parametrize(
+        "amount_in_dollars,expected",
+        [
+            (0, True), (0.99, True),
+            (1, True), (1.15, True),
+            (5, True), (5.15, True)
+            (5.16, False), (10.01, False)
+            (15.00, False), ("", False)
+        ]
+    )
+    def test_has_sufficient_funds_available(self, amount_in_dollars, expected):
+        has_funds = self.trade_bot.has_sufficient_funds_available(amount_in_dollars)
+        assert has_funds == expected
 
-        if available_funds >= 1.00:
-            test_bot.buy_with_available_funds('AAPL')
+
+    # Purchase $3 of AAPL and $2.15 of GOOG.
+    @pytest.mark.parametrize(
+        "ticker,amount_in_dollars,expected",
+        [
+            ('AAPL', 0, False), ('AAPL', 0.99, False),
+            ('AAPL', 10, False), ('AAPL', 3, True), 
+            ('GOOG', 3, False), ('GOOG', 2.15, True), 
+            ('', 1.00, False), ('', 0.99, False),
+            ('AAPL', '', False), ('', '', False)
+        ]
+    )
+    def test_place_buy_order(self, ticker, amount_in_dollars, expected):
+        purchase_data = self.trade_bot.place_buy_order(ticker, amount_in_dollars)
+        assert len(purchase_data) == expected
+
+
+    @pytest.mark.parametrize(
+        "ticker,amount_in_dollars,expected",
+        [
+            ('AAPL', 0.00, False), ('AAPL', 0.50, True),
+            ('AAPL', 2.50, True), ('GOOG', 1, True),
+            ('AAPL', 9.99, False), ('GOOG', 3, False),
+            ('FB', 5, False), ('AAPL', '', False),
+            ('', 2, False), ('', '', False)
+        ]
+    )
+    def test_has_sufficient_equity(self, ticker, amount_in_dollars, expected):
+        has_equity = self.trade_bot.has_sufficient_equity(ticker, amount_in_dollars)
+        assert has_equity == expected
+
+
+    # Sell $1.50 of AAPL and $1 of GOOG.
+    # Left with $1.50 in AAPL and $1.15 in GOOG,
+    # assuming no price fluctuations.
+    @pytest.mark.parametrize(
+        "ticker,amount_in_dollars,expected",
+        [
+            ('AAPL', 0.00, False), ('AAPL', 0.50, False),
+            ('AAPL', 5, False), ('GOOG', 5, False),
+            ('AAPL', 1.50, True), ('GOOG', 1, True),
+            ('FB', 5, False), ('AAPL', '', False),
+            ('', 2, False), ('', '', False)
+        ]
+    )
+    def test_place_sell_order(self, ticker, amount_in_dollars, expected):
+        sale_data = self.trade_bot.place_sell_order(ticker, amount_in_dollars)
+        assert len(sale_data) == expected
+
+
+    # Commit all available funds to a position in MSFT.
+    @pytest.mark.parametrize(
+        "ticker,expected",
+        [
+            ("", False), ("MSFT", True), ("AMZN", False)
+        ]
+    )
+    def test_buy_with_available_funds(self, ticker, expected):
+        purchase_data = self.trade_bot.buy_with_available_funds(ticker)
+        assert len(purchase_data) == expected
+
+        # Check that all the funds were used.
+        if len(purchase_data) > 0:
             available_funds = float(robinhood.profiles.load_account_profile(info='buying_power'))
             assert available_funds == 0
-        else:
-            assert True
 
 
-    def test_sell_entire_position(self):
-        test_bot = trade_bot.TradeBot()
-        test_bot.sell_entire_position('AAPL')
-        current_portfolio = robinhood.account.build_holdings()
+    # Completely sell out of the position in MSFT.
+    @pytest.mark.parametrize(
+        "ticker,expected",
+        [
+            ("", False), ("MSFT", True), ("MSFT", False)
+        ]
+    )
+    def test_sell_entire_position(self, ticker, expected):
+        sale_data = self.trade_bot.sell_entire_position(ticker)
+        assert len(sale_data) == expected
 
-        assert 'AAPL' not in current_portfolio
-
-
-    def test_liquidate_portfolio(self):
-        test_bot = trade_bot.TradeBot()
-        test_bot.liquidate_portfolio()
-        current_portfolio = robinhood.account.build_holdings()
-        
-        assert len(current_portfolio) == 0
-
-
-    def test_make_order_recommendation(self):
-        test_bot = trade_bot.TradeBot()
-        recommend_1 = test_bot.make_order_recommendation('AAPL')
-        recommend_2 = test_bot.make_order_recommendation('BABA')
-
-        assert recommend_1 == 'x'
-        assert recommend_2 == 'x'
-    
-
-    def test_has_sufficient_funds_available(self):
-        test_bot = trade_bot.TradeBot()
-        available_funds = float(robinhood.profiles.load_account_profile(info="buying_power"))
-
-        assert test_bot.has_sufficient_funds_available(5.00) == (available_funds >= 5.00)
-        assert test_bot.has_sufficient_funds_available(1.00) == (available_funds >= 1.00)
+        # Check that the position no longer exists in the portfolio.
+        if len(sale_data) > 0:
+            portfolio = robinhood.account.build_holdings()
+            assert ticker not in portfolio
 
 
-    def test_has_sufficient_equity(self):
-        test_bot = trade_bot.TradeBot()
+    # Sell off all current holdings.
+    @pytest.mark.parametrize(
+        "expected",
+        [
+            (True), (False)
+        ]
+    )
+    def test_liquidate_porfolio(self, expected):
+        compiled_sale_data = self.trade_bot.liquidate_portfolio()
+        assert len(compiled_sale_data) == expected
 
-
-    def test_trade(self):
-        pass
+        # Check that user's portfolio is empty.
+        if len(compiled_sale_data) > 0:
+            portfolio = robinhood.account.build_holdings()
+            assert len(portfolio) == 0
 
 
 class TestTradeBotSimpleMovingAverage():
-    def test_calculate_simple_moving_average(self):
-        test_bot = trade_bot.TradeBotSimpleMovingAverage()
+    trade_bot = tb.TradeBotSimpleMovingAverage()
 
+    def test_calculate_simple_moving_average(self):
         stock_history = {'begins_at': ['2021-07-16T13:15:00Z', '2021-07-16T13:20:00Z', '2021-07-16T13:25:00Z',
                                        '2021-07-16T13:30:00Z', '2021-07-16T13:35:00Z', '2021-07-16T13:40:00Z',
                                        '2021-07-16T13:45:00Z', '2021-07-16T13:50:00Z', '2021-07-16T13:55:00Z',],
@@ -95,9 +155,9 @@ class TestTradeBotSimpleMovingAverage():
                          }
         stock_history_df = pd.DataFrame(stock_history)
 
-        moving_average_3_day = test_bot.calculate_simple_moving_average(stock_history_df, 3)
-        moving_average_5_day = test_bot.calculate_simple_moving_average(stock_history_df, 5)
-        moving_average_9_day = test_bot.calculate_simple_moving_average(stock_history_df, 9)
+        moving_average_3_day = self.trade_bot.calculate_simple_moving_average(stock_history_df, 3)
+        moving_average_5_day = self.trade_bot.calculate_simple_moving_average(stock_history_df, 5)
+        moving_average_9_day = self.trade_bot.calculate_simple_moving_average(stock_history_df, 9)
 
         assert moving_average_3_day == 103.46
         assert moving_average_5_day == 102.36
@@ -109,9 +169,9 @@ class TestTradeBotSimpleMovingAverage():
 
 
 class TestTradeBotVWAP():
-    def test_calculate_VWAP(self):
-        test_bot = trade_bot.TradeBotVWAP(sample_stock_list)
+    trade_bot = tb.TradeBotVWAP()
 
+    def test_calculate_VWAP(self):
         stock_history = {'begins_at': ['2021-07-16T13:15:00Z', '2021-07-16T13:20:00Z', '2021-07-16T13:25:00Z',
                                        '2021-07-16T13:30:00Z', '2021-07-16T13:35:00Z', '2021-07-16T13:40:00Z',
                                        '2021-07-16T13:45:00Z', '2021-07-16T13:50:00Z', '2021-07-16T13:55:00Z',],
@@ -132,18 +192,20 @@ class TestTradeBotVWAP():
         sum_prices_times_volumes =  sum([x*y for x,y in zip(stock_history['volume'], stock_history['close_price'])])
         vwap = round(sum_volumes/sum_prices_times_volumes, 2)
 
-        assert vwap == test_bot.calculate_VWAP(stock_history_df)
+        assert vwap == self.trade_bot.calculate_VWAP(stock_history_df)
+
+
+    def test_make_order_recommendation(self):
+        pass
 
 
 class TestTradeBotSentimentAnalysis():
+    trade_bot = tb.TradeBotSentimentAnalysis()
+
     def test_retrieve_tweets(self):
-        test_bot = trade_bot.TradeBotSentimentAnalysis()
-
         ticker = 'GME'
-
-        public_tweets = test_bot.retrieve_tweets(ticker)
+        public_tweets = self.trade_bot.retrieve_tweets(ticker)
         assert isinstance(public_tweets, list)
-
         max_count = 1000
 
         assert len(public_tweets) == max_count
@@ -154,38 +216,20 @@ class TestTradeBotSentimentAnalysis():
             
 
     def test_analyze_tweet_sentiments(self):
-        test_bot = trade_bot.TradeBotSentimentAnalysis()
-
         ticker = 'AMC'
-
-        public_tweets = test_bot.retrieve_tweets(ticker)
-        average_sentiment_score = test_bot.analyze_tweet_sentiments(public_tweets)
+        public_tweets = self.trade_bot.retrieve_tweets(ticker)
+        average_sentiment_score = self.trade_bot.analyze_tweet_sentiments(public_tweets)
 
         assert isinstance(average_sentiment_score, float)
         assert -1 <= average_sentiment_score <= 1
         
 
-    def test_determine_sentiment(self):
-        test_bot = trade_bot.TradeBotSentimentAnalysis()
-
-        assert test_bot.determine_sentiment(0.00) == 'NEUTRAL'
-        assert test_bot.determine_sentiment(-0.05) == 'NEGATIVE'
-        assert test_bot.determine_sentiment(0.05) == 'POSITIVE'
-        assert test_bot.determine_sentiment(0.25) == 'POSITIVE'
-        assert test_bot.determine_sentiment(-0.33) == 'NEGATIVE'
-        assert test_bot.determine_sentiment(-0.02) == 'NEUTRAL'
-        assert test_bot.determine_sentiment(0.03) == 'NEUTRAL'
-
-
     def test_make_order_recommendation(self):
-        test_bot = trade_bot.TradeBotSentimentAnalysis()
-
+        test_bot = self.trade_bot.TradeBotSentimentAnalysis()
         ticker = 'BABA'
-
         public_tweets = test_bot.retrieve_tweets(ticker)
         average_sentiment_score = test_bot.analyze_tweet_sentiments(public_tweets)
         consensus = test_bot.determine_sentiment(average_sentiment_score)
-
         recommendation = test_bot.make_order_recommendation(ticker)
 
         if consensus == 'POSITIVE':
@@ -194,3 +238,4 @@ class TestTradeBotSentimentAnalysis():
             assert recommendation == 's'
         else:
             assert recommendation == 'x'
+

@@ -7,60 +7,15 @@ import tweepy
 
 
 class TradeBot():
-    def __init__(self, trade_list):
-        """
-        Constructs the TradeBot object with the trade list.
-
-        Parameters
-        ----------
-        trade_list : list
-            A list of companies' ticker symbols.
-        
-        Returns
-        -------
-        None
-        """
-        if trade_list is None:
-            trade_list = []
-        self.trade_list = trade_list
+    def __init__(self):
+        """Logs user into their Robinhood account."""
+        #self.robinhood_login(username, password)
+        pass
 
 
-    def robinhood_login(self):
-        """Logs user into their Robinhood account.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        """
-        robinhood.login(username=ROBINHOOD_USER, password=ROBINHOOD_PASS)
-
-
-    def update_trade_list(self, new_trade_list):
-        """Updates the current trade list.
-
-        Parameters
-        ----------
-        new_trade_list : list
-            A list containing companies' ticker symbols
-            that will update the current trade list.
-
-        Returns
-        -------
-        None
-
-        """
-        self.trade_list = new_trade_list
-
-
-    def get_current_trade_list(self):
-        """Returns the current trade list."""
-
-        return self.trade_list
+    def robinhood_login(self, username, password):
+        """Logs user into their Robinhood account."""
+        return robinhood.login(username, password)
 
 
     def has_sufficient_funds_available(self, amount_in_dollars):
@@ -78,8 +33,7 @@ class TradeBot():
             True if there are sufficient funds in user's account.
 
         """
-        # We cannot place an order with an amount less than 1.
-        if amount_in_dollars < 1:
+        if not amount_in_dollars:
             return False
 
         # Retrieve the available funds.
@@ -105,8 +59,7 @@ class TradeBot():
             True if there is sufficient equity in the user's holding.
 
         """
-        # We cannot place an order with an amount less than 1.
-        if amount_in_dollars < 1:
+        if not amount_in_dollars or amount_in_dollars <= 0:
             return False
 
         portfolio = robinhood.account.build_holdings()
@@ -138,6 +91,14 @@ class TradeBot():
 
         """
         purchase_data = {}
+
+        if not ticker or not amount_in_dollars:
+            print("ERROR: Parameters cannot have null values.")
+            return purchase_data
+
+        if amount_in_dollars < 1:
+            print("ERROR: A purchase cannot be made with less than $1.00 USD.")
+            return purchase_data
 
         # Must have enough funds for the purchase
         if self.has_sufficient_funds_available(amount_in_dollars):
@@ -171,6 +132,14 @@ class TradeBot():
         """
         sale_data = {}
 
+        if not ticker or not amount_in_dollars:
+            print("ERROR: Parameters cannot have null values.")
+            return sale_data
+
+        if amount_in_dollars < 1:
+            print("ERROR: A sale cannot be made with less than $1.00 USD.")
+            return sale_data
+
         # Must have enough equity for the sale
         if self.has_sufficient_equity(ticker, amount_in_dollars):
             print(f"Selling ${amount_in_dollars} of {ticker}...")
@@ -199,6 +168,9 @@ class TradeBot():
             etc.), the price, and the quantity.
 
         """
+        if not ticker:
+            return {}
+
         available_funds = float(robinhood.profiles.load_account_profile(info='buying_power'))
         return self.place_buy_order(ticker, available_funds)
 
@@ -221,9 +193,12 @@ class TradeBot():
 
         """
         portfolio = robinhood.account.build_holdings()
-        position = portfolio[ticker]
-        equity = float(position['equity'])
-        return self.place_sell_order(ticker, equity)
+        if ticker in portfolio:
+            position = portfolio[ticker]
+            equity = float(position['equity'])
+            return self.place_sell_order(ticker, equity)
+        
+        return {}
 
 
     def liquidate_portfolio(self):
@@ -357,7 +332,7 @@ class TradeBotSimpleMovingAverage(TradeBot):
         # Construct a DataFrame with the stock history.
         stock_history = robinhood.stocks.get_stock_historicals(ticker, 
                                                                interval='day', 
-                                                               span='year' )
+                                                               span='year')
         stock_history_df = pd.DataFrame(stock_history)
 
         # Calculate the 200-day moving average.
@@ -622,7 +597,7 @@ class TradeBotSentimentAnalysis(TradeBot):
         str
             A string with the order recommendation. Returns 
             'buy', 'sell', or None.
-            
+
         """
         public_tweets = self.retrieve_tweets(ticker)
         consensus_score = self.analyze_tweet_sentiments(public_tweets)
