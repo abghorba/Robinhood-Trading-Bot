@@ -220,7 +220,7 @@ class TradeBot():
         """
         compiled_sale_information = []
         portfolio = robinhood.account.build_holdings()
-        for ticker in portfolio.items():
+        for ticker in portfolio.keys():
             sale_information = self.sell_entire_position(ticker)
             compiled_sale_information.append(sale_information)
         
@@ -278,12 +278,6 @@ class TradeBot():
 
 
 class TradeBotSimpleMovingAverage(TradeBot):
-    def __init__(self, trade_list):
-        if trade_list is None:
-            trade_list = []
-        TradeBot.__init__(self, trade_list)
-
-
     def calculate_simple_moving_average(self, stock_history_df, number_of_days):
         """Calculates the simple moving average based 
         on the number of days.
@@ -351,11 +345,6 @@ class TradeBotSimpleMovingAverage(TradeBot):
 
 
 class TradeBotVWAP(TradeBot):
-    def __init__(self, trade_list):
-        if trade_list is None:
-            trade_list = []
-        TradeBot.__init__(self, trade_list)
-
     def calculate_VWAP(self, stock_history_df):
         """Calculates the Volume-Weighted Average Price (VWAP).
 
@@ -423,11 +412,6 @@ class TradeBotVWAP(TradeBot):
 
 
 class TradeBotPairsTrading(TradeBot):
-    def __init__(self, trade_list):
-        if trade_list is None:
-            trade_list = []
-        TradeBot.__init__(self, trade_list)
-
     def make_order_recommendation(self, ticker_1, ticker_2):
         """Makes a recommendation for a market order by comparing
         the prices of two closely related securities.
@@ -505,12 +489,6 @@ class TradeBotPairsTrading(TradeBot):
 
 
 class TradeBotSentimentAnalysis(TradeBot):
-    def __init__(self, trade_list):
-        if trade_list is None:
-            trade_list = []
-        TradeBot.__init__(self, trade_list)
-    
-
     def retrieve_tweets(self, ticker, max_count=1000):
         """Retrieves tweets from Twitter about ticker.
 
@@ -535,7 +513,7 @@ class TradeBotSentimentAnalysis(TradeBot):
         query = robinhood.stocks.get_name_by_symbol(ticker)
 
         # Search for max_counts tweets mentioning the company.
-        public_tweets = tweepy.Cursor(api.search, q=query, lang='en', tweet_mode = 'extended').items(max_count)
+        public_tweets = tweepy.Cursor(api.search_tweets, q=query, lang='en', tweet_mode = 'extended').items(max_count)
 
         # Extract the text body of each tweet.
         searched_tweets = []
