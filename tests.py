@@ -15,12 +15,6 @@ def slow_down_tests():
 class TestTradeBot():
     trade_bot = tb.TradeBot()
 
-    def test_robinhood_login_is_successful(self):
-        login_data = self.trade_bot.robinhood_login(ROBINHOOD_USER, ROBINHOOD_PASS)
-        assert isinstance(login_data, dict)
-        assert len(login_data) > 0
-
-
     # The test account has been initialized with $5.15.
     @pytest.mark.parametrize(
         "amount_in_dollars,expected",

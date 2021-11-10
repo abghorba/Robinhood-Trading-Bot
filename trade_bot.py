@@ -1,4 +1,4 @@
-from config import ROBINHOOD_USER, ROBINHOOD_PASS, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
+from config import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 import pandas as pd
@@ -7,15 +7,14 @@ import tweepy
 
 
 class TradeBot():
-    def __init__(self):
+    def __init__(self, username, password):
         """Logs user into their Robinhood account."""
-        #self.robinhood_login(username, password)
-        pass
+        robinhood.login(username, password)
 
 
-    def robinhood_login(self, username, password):
-        """Logs user into their Robinhood account."""
-        return robinhood.login(username, password)
+    def robinhood_logout(self):
+        """Logs user out of their Robinhood account."""
+        return robinhood.logout()
 
 
     def has_sufficient_funds_available(self, amount_in_dollars):
