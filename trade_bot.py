@@ -295,6 +295,14 @@ class TradeBotSimpleMovingAverage(TradeBot):
             The simple moving average for n days.
 
         """
+        if not stock_history_df:
+            print("ERROR: Parameters cannot have null values.")
+            return 0
+
+        if not number_of_days or number_of_days <= 0:
+            print("ERROR: number_of_days must be a positive number.")
+            return 0
+
         # Typecast the column to numerics.
         stock_history_df['close_price'] = pd.to_numeric(stock_history_df['close_price'], errors='coerce')
 
@@ -323,6 +331,10 @@ class TradeBotSimpleMovingAverage(TradeBot):
             'buy', 'sell', or None.
 
         """
+        if not ticker:
+            print("ERROR: Parameters cannot have null values.")
+            return None
+
         # Construct a DataFrame with the stock history.
         stock_history = robinhood.stocks.get_stock_historicals(ticker, 
                                                                interval='day', 
@@ -344,7 +356,7 @@ class TradeBotSimpleMovingAverage(TradeBot):
             return None
 
 
-class TradeBotVWAP(TradeBot):
+class TradeBotVWAP(TradeBot):    
     def calculate_VWAP(self, stock_history_df):
         """Calculates the Volume-Weighted Average Price (VWAP).
 
@@ -359,6 +371,10 @@ class TradeBotVWAP(TradeBot):
             The calculated Volume-Weighted Average Price.
 
         """
+        if not stock_history_df:
+            print("ERROR: Parameters cannot have null values.")
+            return 0
+
         # Typecast the columns we need.
         stock_history_df['close_price'] = pd.to_numeric(stock_history_df['close_price'], errors='coerce')
         stock_history_df['volume'] = pd.to_numeric(stock_history_df['volume'], errors='coerce')
@@ -390,6 +406,10 @@ class TradeBotVWAP(TradeBot):
             'buy', 'sell', or None.
 
         """
+        if not ticker:
+            print("ERROR: Parameters cannot have null values.")
+            return None
+
         # Retrieve the stock history and place into a DataFrame.
         stock_history = robinhood.stocks.get_stock_historicals(ticker, 
                                                                interval='5minute', 
@@ -411,91 +431,16 @@ class TradeBotVWAP(TradeBot):
             return None
 
 
-class TradeBotPairsTrading(TradeBot):
-    def make_order_recommendation(self, ticker_1, ticker_2):
-        """Makes a recommendation for a market order by comparing
-        the prices of two closely related securities.
-        Returns:
-        'b' if the price of ticker_1 is greater than ticker_2
-        's' if the price of ticker_1 is less than ticker_2
-        'x' if the two prices are equal.
-        'b' means buy ticker_1 and sell ticker_2.
-        's' means sell ticker_1 and buy ticker_2.
-        'x' means sell both ticker_1 and ticker_2.
-
-        Parameters
-        ----------
-        ticker_1 : str
-            First company's ticker symbol.
-        ticker_2 : str
-            Second company's ticker symbol.     
-
-        Returns
-        -------
-        str
-            A string with the order recommendation. Returns 
-            'buy', 'sell', or None.
-            'buy' : buy ticker_1 and sell ticker_2.
-            'sell' : sell ticker_1 and buy ticker_2.
-             None :  sell both ticker_1 and ticker_2.
-
-        """
-        # Get the current prices of both tickers.
-        current_price_of_ticker_1 = float(robinhood.stocks.get_latest_price(ticker_1, includeExtendedHours=False)[0])
-        current_price_of_ticker_2 = float(robinhood.stocks.get_latest_price(ticker_2, includeExtendedHours=False)[0])
-
-        price_difference = current_price_of_ticker_1 - current_price_of_ticker_2
-
-        if price_difference > 0:
-            return 'buy'
-        elif price_difference < 0:
-            return 'sell'
-        else:
-            return None
-
-
-    def trade(self):
-        """
-        Places buy/sell orders for fractional shares of stock.
-
-        :param amount_in_dollars: The amount to transact with.
-        :type amount_in_dollars: float
-        :returns: None
-
-        """
-        for ticker_pairs in self.trade_list:
-            ticker_1 = ticker_pairs[0]
-            ticker_2 = ticker_pairs[1]
-            action = self.make_order_recommendation(ticker_1, ticker_2)
-
-            if action == 'buy':
-                # Sell position in ticker_2                                             
-                self.sell_entire_position(ticker_2)
-
-                # Buy ticker_1 with all available funds
-                self.buy_with_available_funds(ticker_1)
-
-            elif action == 'sell':
-                # Sell position in ticker_1
-                self.sell_entire_position(ticker_1)
-
-                # Buy ticker_2 with all available funds
-                self.buy_with_available_funds(ticker_2)
-
-            else:
-                # Sell ticker_1 and ticker_2
-                self.sell_entire_position(ticker_1)
-                self.sell_entire_position(ticker_2)
-
-
 class TradeBotSentimentAnalysis(TradeBot):
-    def retrieve_tweets(self, ticker, max_count=1000):
+    def retrieve_tweets(self, ticker, max_count=100):
         """Retrieves tweets from Twitter about ticker.
 
         Parameters
         ----------
         ticker : str
             A company's ticker symbol.
+        max_count : int
+            The maximum number of tweets to retrieve.
 
         Returns
         -------
@@ -503,17 +448,26 @@ class TradeBotSentimentAnalysis(TradeBot):
             A list of texts of the retrieved tweets.
 
         """
+        searched_tweets = []
+
+        if not ticker:
+            print("ERROR: Parameters cannot have null values.")
+            return searched_tweets
+        
+        if max_count <= 0:
+            print("ERROR: max_count must be a positive number.")
+            return searched_tweets
+            
         # Connect to the Twitter API.
-        consumer_key = TWITTER_CONSUMER_KEY
-        consumer_secret = TWITTER_CONSUMER_SECRET
-        auth = tweepy.AppAuthHandler(consumer_key, consumer_secret)
+        auth = tweepy.AppAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
         api = tweepy.API(auth)
 
         # Retrieve the company name represented by ticker.
-        query = robinhood.stocks.get_name_by_symbol(ticker)
+        company_name = robinhood.stocks.get_name_by_symbol(ticker)
+        query = f"#{company_name} OR ${ticker}"
 
         # Search for max_counts tweets mentioning the company.
-        public_tweets = tweepy.Cursor(api.search_tweets, q=query, lang='en', tweet_mode = 'extended').items(max_count)
+        public_tweets = tweepy.Cursor(api.search_tweets, q=query, lang='en', result_type='recent', tweet_mode='extended').items(max_count)
 
         # Extract the text body of each tweet.
         searched_tweets = []
@@ -542,6 +496,10 @@ class TradeBotSentimentAnalysis(TradeBot):
             the list of tweets.
 
         """
+        if not tweets:
+            print("ERROR: Parameters cannot have null values.")
+            return 0
+
         analyzer = SentimentIntensityAnalyzer()
 
         # Initialize an empty DataFrame.
@@ -577,6 +535,10 @@ class TradeBotSentimentAnalysis(TradeBot):
             'buy', 'sell', or None.
 
         """
+        if not ticker:
+            print("ERROR: Parameters cannot have null values.")
+            return None
+
         public_tweets = self.retrieve_tweets(ticker)
         consensus_score = self.analyze_tweet_sentiments(public_tweets)
 

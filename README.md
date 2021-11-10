@@ -15,10 +15,6 @@ and then dividing by the total shares traded in the period. A threshold is also 
 of a security is below the VWAP plus some threshold, a buy recommendation is made. A sell recommendation is made when the current
 price of a security is above the VWAP plus some threshold. If neither conditions are met, no recommendation is made.
 
-<h3> Pairs Trading </h3>
-This algorithm involves knowing two securities that are closely related. For instance, Coca-Cola and Pepsi would be two closely related securities.
-The intent of the algorithm is to short the overperforming security and go long on the underperforming security.
-
 <h3> Sentiment Analysis </h3>
 This algorithm sources tweets from the Twitter API that mention a company's name. A sentiment analysis is performed on each tweet and a score is assigned
 which details the negativity, neutrality, or positivity of the sentiment. The average sentiment score is taken and if the sentiment is positive a buy
@@ -44,11 +40,11 @@ We are now ready for usage!!
 
 
 <h2> Usage </h2>
-You can choose which algorithm you want to trade with. Specify a trading list to pass into the parameter of your trade bot instance. Then call the function
+You can choose which algorithm you want to trade with. Then call the function
 
-        trade(amount_in_dollars)
+        trade(ticker, amount_in_dollars)
 
-and your bot will trade each security with the specified amount_in_dollars.
+and your bot will trade ticker with the specified amount_in_dollars.
 
 Have fun!
 
