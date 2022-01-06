@@ -355,7 +355,7 @@ class TradeBotSimpleMovingAverage(TradeBot):
             return None
 
 
-class TradeBotVWAP(TradeBot):    
+class TradeBotVWAP(TradeBot):
     def calculate_VWAP(self, stock_history_df):
         """Calculates the Volume-Weighted Average Price (VWAP).
 
@@ -388,7 +388,7 @@ class TradeBotVWAP(TradeBot):
         return vwap
 
 
-    def make_order_recommendation(self, ticker, buy_threshold=0, sell_threshold=0):
+    def make_order_recommendation(self, ticker):
         """Makes a recommendation for a market order by comparing
         the Volume-Weighted Average Price (VWAP) to the current
         market price.
@@ -422,9 +422,9 @@ class TradeBotVWAP(TradeBot):
         current_price = float(robinhood.stocks.get_latest_price(ticker, includeExtendedHours=False)[0])
 
         # Determine the order recommendation.
-        if current_price < vwap + buy_threshold:
+        if current_price < vwap:
             return 'buy'
-        elif current_price > vwap + sell_threshold:
+        elif current_price > vwap:
             return 'sell'
         else:
             return None
@@ -520,7 +520,7 @@ class TradeBotSentimentAnalysis(TradeBot):
 
     def make_order_recommendation(self, ticker):
         """Makes an order recommendation based on the sentiment of
-        20,000 tweets about ticker.
+        max_count tweets about ticker.
 
         Parameters
         ----------
@@ -547,3 +547,8 @@ class TradeBotSentimentAnalysis(TradeBot):
             return 'sell'
         else:
             return None
+
+
+class TradeBotExponentialMovingAverage(TradeBotSimpleMovingAverage):
+    pass
+

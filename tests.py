@@ -5571,4 +5571,3 @@ class TestTradeBotSentimentAnalysis():
             assert recommendation == 'sell'
         else:
             assert recommendation is None
-

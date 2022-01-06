@@ -11,9 +11,8 @@ No recommendation is amde when the two moving averages are equal.
 
 <h3> Volume-Weighted Average Price Comparison </h3>
 The Volume-Weighted Average Price (VWAP) is calculated by adding up the dollars traded for every transaction in a period (price times number of shares traded)
-and then dividing by the total shares traded in the period. A threshold is also made so that when the current price
-of a security is below the VWAP plus some threshold, a buy recommendation is made. A sell recommendation is made when the current
-price of a security is above the VWAP plus some threshold. If neither conditions are met, no recommendation is made.
+and then dividing by the total shares traded in the period. When the current price of a security is below the VWAP, a buy recommendation is made.
+A sell recommendation is made when the currentprice of a security is above the VWAP. If neither conditions are met, no recommendation is made.
 
 <h3> Sentiment Analysis </h3>
 This algorithm sources tweets from the Twitter API that mention a company's name. A sentiment analysis is performed on each tweet and a score is assigned

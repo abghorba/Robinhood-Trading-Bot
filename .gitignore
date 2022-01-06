@@ -6,3 +6,4 @@ config.py
 main.py
 .DS_Store/
 crypto_bot.py
+backtests.py
