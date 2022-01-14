@@ -1,5 +1,3 @@
-from config import ROBINHOOD_USER, ROBINHOOD_PASS
-
 import pandas as pd
 import pytest
 import random
