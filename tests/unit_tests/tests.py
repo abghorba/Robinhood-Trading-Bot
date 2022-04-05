@@ -3,7 +3,12 @@ import pytest
 import random
 import robin_stocks.robinhood as robinhood
 import time
-import trade_bot as tb
+
+from trading_bots.base import TradeBot
+from trading_bots.simple_moving_average import TradeBotSimpleMovingAverage
+from trading_bots.volume_weighted_average_price import TradeBotVWAP
+from trading_bots.twitter_sentiments import TradeBotSentimentAnalysis
+
 
 @pytest.fixture(autouse=True)
 def slow_down_tests():
@@ -11,7 +16,7 @@ def slow_down_tests():
     time.sleep(1)
 
 class TestTradeBot():
-    trade_bot = tb.TradeBot()
+    trade_bot = TradeBot()
 
     # The test account has been initialized with $5.15.
     @pytest.mark.parametrize(
@@ -130,7 +135,7 @@ class TestTradeBot():
 
 
 class TestTradeBotSimpleMovingAverage():
-    trade_bot = tb.TradeBotSimpleMovingAverage()
+    trade_bot = TradeBotSimpleMovingAverage()
 
     stock_history = [
         {
@@ -2922,7 +2927,7 @@ class TestTradeBotSimpleMovingAverage():
 
 
 class TestTradeBotVWAP():
-    trade_bot = tb.TradeBotVWAP()
+    trade_bot = TradeBotVWAP()
 
     stock_history_1 = [
         {
@@ -5520,7 +5525,7 @@ class TestTradeBotVWAP():
 
 
 class TestTradeBotSentimentAnalysis():
-    trade_bot = tb.TradeBotSentimentAnalysis()
+    trade_bot = TradeBotSentimentAnalysis()
 
     @pytest.mark.parametrize(
         "ticker,max_count",
