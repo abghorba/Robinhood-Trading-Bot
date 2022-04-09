@@ -5,3 +5,4 @@ env/
 main.py
 .DS_Store/
 crypto_bot.py
+.env
