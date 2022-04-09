@@ -1,7 +1,7 @@
 import pandas as pd
 import robin_stocks as robinhood
 
-from base import OrderType, TradeBot
+from trading_bots.base import OrderType, TradeBot
 
 
 class TradeBotVWAP(TradeBot):
@@ -18,7 +18,7 @@ class TradeBotVWAP(TradeBot):
         :return: The calculated Volume-Weighted Average Price
         """
 
-        if not stock_history_df:
+        if stock_history_df.empty:
             print("ERROR: Parameters cannot have null values.")
             return 0
 
@@ -56,14 +56,12 @@ class TradeBotVWAP(TradeBot):
         # Calculate the VWAP from the last day in 5 minute intervals.
         stock_history_df = self.get_stock_history_dataframe(ticker, 
                                                             interval="5minute",
-                                                            span="day")
+                                                            time_span="day")
         
         vwap = self.calculate_VWAP(stock_history_df)
 
         # Get the current market price of the stock.
-        current_price = float(
-            robinhood.stocks.get_latest_price(ticker, includeExtendedHours=False)[0]
-        )
+        current_price = self.get_current_market_price(ticker)
 
         # Determine the order recommendation.
         if current_price < vwap:

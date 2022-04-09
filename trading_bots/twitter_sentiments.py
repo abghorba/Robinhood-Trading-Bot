@@ -2,8 +2,8 @@ import pandas as pd
 import robin_stocks as robinhood
 import tweepy
 
-from base import OrderType, TradeBot
 from config import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
+from trading_bots.base import OrderType, TradeBot
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 
@@ -38,7 +38,7 @@ class TradeBotSentimentAnalysis(TradeBot):
         api = tweepy.API(auth)
 
         # Retrieve the company name represented by ticker.
-        company_name = robinhood.stocks.get_name_by_symbol(ticker)
+        company_name = self.get_company_name_from_ticker(ticker)
         query = f"#{company_name} OR ${ticker}"
 
         # Search for max_counts tweets mentioning the company.

@@ -1,7 +1,7 @@
 import robin_stocks as robinhood
 import pandas as pd
 
-from base import OrderType, TradeBot
+from trading_bots.base import OrderType, TradeBot
 
 
 class TradeBotSimpleMovingAverage(TradeBot):
@@ -21,7 +21,7 @@ class TradeBotSimpleMovingAverage(TradeBot):
         :return: The n-day simple moving average
         """
 
-        if not stock_history_df:
+        if stock_history_df.empty:
             print("ERROR: Parameters cannot have null values.")
             return 0
 

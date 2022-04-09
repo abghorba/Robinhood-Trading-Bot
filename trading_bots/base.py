@@ -21,6 +21,38 @@ class TradeBot():
 
         return robinhood.logout()
 
+    def get_current_positions(self):
+        """Returns a dictionary of currently held positions."""
+
+        return robinhood.account.build_holdings()
+
+    def get_current_cash_position(self):
+        """Returns the current cash position as a float."""
+
+        return float(robinhood.profiles.load_account_profile(info="buying_power"))
+
+    def get_current_market_price(self, ticker):
+        """Returns the current market price of ticker
+        
+        :param ticker: A company's symbol as a string
+        :return: Current market price in USD
+        """
+
+        if not ticker:
+            return 0
+
+        return float(robinhood.stocks.get_latest_price(ticker, includeExtendedHours=False)[0])
+
+    def get_company_name_from_ticker(self, ticker):
+        """
+        Returns the company name represented by ticker.
+        
+        :param ticker: A company's ticker symbol as a string
+        :return: Company name as a string
+        """
+
+        return robinhood.stocks.get_name_by_symbol(ticker)
+
     def get_stock_history_dataframe(self, ticker, interval="day", time_span="year"):
         """
         Sends request to the Robinhood API to retrieve historical stock
@@ -40,6 +72,22 @@ class TradeBot():
 
         return pd.DataFrame(stock_history)
     
+    def get_equity_in_position(self, ticker):
+        """
+        Returns the dollar value of the equity in the position
+        
+        :param ticker: A company's ticker symbol as a string
+        :return: float
+        """
+
+        portfolio = self.get_current_positions()
+
+        if ticker in portfolio:
+            position = portfolio[ticker]
+            return float(position["equity"])
+        
+        return -1
+
     def has_sufficient_funds_available(self, amount_in_dollars):
         """
         Returns a boolean if user's account has enough buying
@@ -53,9 +101,7 @@ class TradeBot():
             return False
 
         # Retrieve the available funds.
-        available_funds = float(
-            robinhood.profiles.load_account_profile(info="buying_power")
-        )
+        available_funds = self.get_current_cash_position()
 
         return available_funds >= amount_in_dollars
 
@@ -72,15 +118,9 @@ class TradeBot():
         if not amount_in_dollars or amount_in_dollars <= 0:
             return False
 
-        portfolio = robinhood.account.build_holdings()
+        equity_in_position = self.get_equity_in_position(ticker)
 
-        if ticker in portfolio:
-            position = portfolio[ticker]
-            equity_in_position = float(position["equity"])
-
-            return equity_in_position >= amount_in_dollars
-
-        return False
+        return equity_in_position >= amount_in_dollars
 
     def place_buy_order(self, ticker, amount_in_dollars):
         """
@@ -173,9 +213,7 @@ class TradeBot():
         if not ticker:
             return {}
 
-        available_funds = float(
-            robinhood.profiles.load_account_profile(info="buying_power")
-        )
+        available_funds = self.get_current_cash_position()
 
         return self.place_buy_order(ticker, available_funds)
 
@@ -190,15 +228,12 @@ class TradeBot():
         etc.), the price, and the quantity
         """
 
-        portfolio = robinhood.account.build_holdings()
+        if not ticker:
+            return {}
 
-        if ticker in portfolio:
-            position = portfolio[ticker]
-            equity = float(position["equity"])
+        equity_in_position = self.get_equity_in_position(ticker)
 
-            return self.place_sell_order(ticker, equity)
-
-        return {}
+        return self.place_sell_order(ticker, equity_in_position)
 
     def liquidate_portfolio(self):
         """
@@ -212,7 +247,7 @@ class TradeBot():
         """
 
         compiled_sale_information = []
-        portfolio = robinhood.account.build_holdings()
+        portfolio = self.get_current_positions()
 
         for ticker in portfolio.keys():
             sale_information = self.sell_entire_position(ticker)

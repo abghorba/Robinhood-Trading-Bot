@@ -22,7 +22,7 @@ is made.
 
 
 <h2> Setting Up </h2>
-You will need to have a Robinhood account and a Twitter API key. Create a file called config.py with the following lines of code, replacing the empty strings
+You will need to have a Robinhood account and a Twitter API key. Create a .env file with the following, replacing the empty strings
 with your information:
 
         TWITTER_CONSUMER_KEY = ''
