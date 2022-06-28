@@ -39,7 +39,7 @@ class TradeBot():
         """
 
         if not ticker:
-            return 0
+            return 0.00
 
         return float(robinhood.stocks.get_latest_price(ticker, includeExtendedHours=False)[0])
 
@@ -50,6 +50,8 @@ class TradeBot():
         :param ticker: A company's ticker symbol as a string
         :return: Company name as a string
         """
+        if not ticker:
+            return ""
 
         return robinhood.stocks.get_name_by_symbol(ticker)
 
@@ -59,10 +61,17 @@ class TradeBot():
         information.
 
         :param ticker: A company's ticker symbol as a string
-        :param interval: time intervals for data points; Default 'day'
-        :param time_span: time span for the data points: Default 'year'
+        :param interval: time intervals for data points; Values are '5minute', 
+        '10minute', 'hour', 'day', or 'week'. Default is 'day'
+        :param time_span: time span for the data points: Values are 'day',
+        'week', 'month', '3month', 'year', or '5year'. Default is 'year'
         :return: DataFrame of stock historical information
         """
+        if not ticker or interval not in {'5minute', '10minute', 'hour', 'day', 'week'} or \
+            time_span not in {'day', 'week', 'month', '3month', 'year', '5year'}:
+            
+            return pd.DataFrame()
+
 
         stock_history = robinhood.stocks.get_stock_historicals(
             ticker,
