@@ -18,8 +18,12 @@ class TradeBotVWAP(TradeBot):
         :return: The calculated Volume-Weighted Average Price
         """
 
+        if not stock_history_df:
+            print("ERROR: stock_history_df cannot be null")
+            return 0
+
         if stock_history_df.empty:
-            print("ERROR: Parameters cannot have null values.")
+            print("ERROR: stock_history_df cannot be empty")
             return 0
 
         # Typecast the columns we need.
@@ -50,7 +54,7 @@ class TradeBotVWAP(TradeBot):
         """
 
         if not ticker:
-            print("ERROR: Parameters cannot have null values.")
+            print("ERROR: ticker cannot be a null value")
             return None
 
         # Calculate the VWAP from the last day in 5 minute intervals.

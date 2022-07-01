@@ -22,16 +22,14 @@ is made.
 
 
 <h2> Setting Up </h2>
-You will need to have a Robinhood account and a Twitter API key. Create a .env file with the following, replacing the empty strings
-with your information:
+You will need to have a Robinhood account and a Twitter API key. Navigate to initialize.sh and populate the following:
 
-        TWITTER_CONSUMER_KEY = ''
-        TWITTER_CONSUMER_SECRET = ''
+        TWITTER_CONSUMER_KEY = ""
+        TWITTER_CONSUMER_SECRET = ""
+        ROBINHOOD_USER = ""
+        ROBINHOOD_PASS = ""
 
-        ROBINHOOD_USER = ''
-        ROBINHOOD_PASS = ''
-
-After this is done, you can create a virtual environment and install dependencies by running:
+After this is done, you can create a virtual environment, install dependencies, and create your .env file by running:
 
         sh initialize.sh
 
@@ -45,7 +43,15 @@ You can choose which algorithm you want to trade with. Then call the function
 
 and your bot will trade ticker with the specified amount_in_dollars.
 
+If you want to create your own bot with your own algorithm, you simply need to navigate to new_bot_skeleton.py found in the trading_bots folder and add
+your own algorithm into:
+        
+        make_order_recommendation(self, ticker):
+
+Add in whatever helper functions you may need. Make sure that the above function returns a value of type OrderType!
+
 Have fun!
 
+<h2> Disclaimer </h2>
 Any stock or ticker mentioned is not to be taken as financial advice. You are using this bot at your own discretion and with the knowledge that you can lose
 (part of) your investment.

@@ -26,7 +26,7 @@ class TradeBotSentimentAnalysis(TradeBot):
         searched_tweets = []
 
         if not ticker:
-            print("ERROR: Parameters cannot have null values.")
+            print("ERROR: param ticker cannot be a null value")
             return searched_tweets
 
         if max_count <= 0:
@@ -72,7 +72,7 @@ class TradeBotSentimentAnalysis(TradeBot):
         """
 
         if not tweets:
-            print("ERROR: Parameters cannot have null values.")
+            print("ERROR: param tweets cannot be a null value")
             return 0
 
         analyzer = SentimentIntensityAnalyzer()
@@ -105,7 +105,7 @@ class TradeBotSentimentAnalysis(TradeBot):
         """
 
         if not ticker:
-            print("ERROR: Parameters cannot have null values.")
+            print("ERROR: param ticker cannot be a null value")
             return None
 
         public_tweets = self.retrieve_tweets(ticker)

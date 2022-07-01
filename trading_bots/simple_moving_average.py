@@ -21,8 +21,12 @@ class TradeBotSimpleMovingAverage(TradeBot):
         :return: The n-day simple moving average
         """
 
+        if not stock_history_df:
+            print("ERROR: stock_history_df cannot be null")
+            return 0
+
         if stock_history_df.empty:
-            print("ERROR: Parameters cannot have null values.")
+            print("ERROR: stock_history_df cannot be empty")
             return 0
 
         if not number_of_days or number_of_days <= 0:
@@ -52,7 +56,7 @@ class TradeBotSimpleMovingAverage(TradeBot):
         """
 
         if not ticker:
-            print("ERROR: Parameters cannot have null values.")
+            print("ERROR: ticker cannot be a null value")
             return None
 
         stock_history_df = self.get_stock_history_dataframe(ticker)
