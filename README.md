@@ -31,9 +31,9 @@ with your information:
         ROBINHOOD_USER = ''
         ROBINHOOD_PASS = ''
 
-After this is done, you can install dependencies:
+After this is done, you can create a virtual environment and install dependencies by running:
 
-        pip install -r requirements.txt
+        sh initialize.sh
 
 We are now ready for usage!!
 
