@@ -1,7 +1,6 @@
 #!/bin/sh
 
-VIRTUAL_ENV="env"
-if [ ! -d "$VIRTUAL_ENV" ]; then
+if [ ! -d "env" ]; then
     echo "Creating virtual environment: env"
     python3 -m venv env
     source env/bin/activate
@@ -10,12 +9,11 @@ if [ ! -d "$VIRTUAL_ENV" ]; then
     echo "Done!"
 fi
 
-ENV_VARIABLES=".env"
 TWITTER_CONSUMER_KEY=""
 TWITTER_CONSUMER_SECRET=""
 ROBINHOOD_USER=""
 ROBINHOOD_PASS=""
-if [ ! -f "$ENV_VARIABLES" ]; then
+if [ ! -f ".env" ]; then
     echo "Creating .env file to store environment variables..."
     touch .env
     echo "TWITTER_CONSUMER_KEY = \"$TWITTER_CONSUMER_KEY\"" >> .env

@@ -24,10 +24,10 @@ is made.
 <h2> Setting Up </h2>
 You will need to have a Robinhood account and a Twitter API key. Navigate to initialize.sh and populate the following:
 
-        TWITTER_CONSUMER_KEY = ""
-        TWITTER_CONSUMER_SECRET = ""
-        ROBINHOOD_USER = ""
-        ROBINHOOD_PASS = ""
+        TWITTER_CONSUMER_KEY=""
+        TWITTER_CONSUMER_SECRET=""
+        ROBINHOOD_USER=""
+        ROBINHOOD_PASS=""
 
 After this is done, you can create a virtual environment, install dependencies, and create your .env file by running:
 
