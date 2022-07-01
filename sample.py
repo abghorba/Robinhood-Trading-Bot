@@ -23,7 +23,7 @@ def main():
     tb3 = TradeBotSentimentAnalysis(ROBINHOOD_USER, ROBINHOOD_PASS)
 
     print(f"Current positions : {tb0.get_current_positions()}")
-    print(f"Current cash position : {tb0.get_current_cash_position()}")
+    print(f"Current cash position : ${tb0.get_current_cash_position()}")
 
     company_name = tb0.get_company_name_from_ticker(ticker)
     print(f"Market price of {company_name} is ${tb0.get_current_market_price(ticker)}")
