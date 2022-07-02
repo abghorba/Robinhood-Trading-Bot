@@ -21,7 +21,7 @@ class TradeBotSimpleMovingAverage(TradeBot):
         :return: The n-day simple moving average
         """
 
-        if not stock_history_df:
+        if stock_history_df is None:
             print("ERROR: stock_history_df cannot be null")
             return 0
 

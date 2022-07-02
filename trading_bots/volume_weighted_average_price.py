@@ -19,7 +19,7 @@ class TradeBotVWAP(TradeBot):
         :return: The calculated Volume-Weighted Average Price
         """
 
-        if not stock_history_df:
+        if stock_history_df is None:
             print("ERROR: stock_history_df cannot be null")
             return 0
 

@@ -310,18 +310,20 @@ class TestTradeBotSimpleMovingAverage():
     
     ##########################################################################
     @pytest.mark.parametrize(
-        "number_of_days,expected",
+        "stock_history,number_of_days,expected",
         [
-            (10, 150.37), 
-            (25, 147.13), 
-            (50, 147.59),
-            (100, 145.87), 
-            (150, 140.28), 
-            (200, 137.01),
+            (None, None, 0),
+            (pd.DataFrame(), 10, 0),
+            (STOCK_HISTORY_SAMPLE, 0, 0),
+            (STOCK_HISTORY_SAMPLE, -1, 0),
+            (STOCK_HISTORY_SAMPLE, 25, 147.13), 
+            (STOCK_HISTORY_SAMPLE, 100, 145.87), 
+            (STOCK_HISTORY_SAMPLE, 200, 137.01),
         ]
     )
-    def test_calculate_simple_moving_average(self, number_of_days, expected):
-        moving_average = self.trade_bot.calculate_simple_moving_average(self.stock_history_df, number_of_days)
+    def test_calculate_simple_moving_average(self, stock_history, number_of_days, expected):
+        stock_history_df = pd.DataFrame(stock_history)
+        moving_average = self.trade_bot.calculate_simple_moving_average(stock_history_df, number_of_days)
         assert moving_average == expected
 
 
@@ -333,9 +335,11 @@ class TestTradeBotVWAP():
     @pytest.mark.parametrize(
         "stock_history,expected",
         [
+            (None, 0),
+            (pd.DataFrame(), 0),
             (AAPL_STOCK_HISTORY_SAMPLE, 150.81), 
             (FB_STOCK_HISTORY_SAMPLE, 336.60),
-            (GOOG_STOCK_HISTORY_SAMPLE, 2981.67) 
+            (GOOG_STOCK_HISTORY_SAMPLE, 2981.67),
         ]
     )
     def test_calculate_VWAP(self, stock_history, expected):
