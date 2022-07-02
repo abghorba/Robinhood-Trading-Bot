@@ -1,11 +1,8 @@
-from ast import Or
-import robin_stocks as robinhood
-
 from trading_bots.base import OrderType
 from trading_bots.base import TradeBot
 
 
-class TradeBotSimpleMovingAverage(TradeBot):
+class TradeBotSkeleton(TradeBot):
 
     def __init__(self, username, password):
         """Logs user into their Robinhood account."""

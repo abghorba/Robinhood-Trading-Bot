@@ -1,7 +1,7 @@
-import robin_stocks as robinhood
 import pandas as pd
 
-from trading_bots.base import OrderType, TradeBot
+from trading_bots.base import OrderType
+from trading_bots.base import TradeBot
 
 
 class TradeBotSimpleMovingAverage(TradeBot):

@@ -1,9 +1,10 @@
 import pandas as pd
-import robin_stocks as robinhood
 import tweepy
 
-from config import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
-from trading_bots.base import OrderType, TradeBot
+from config import TWITTER_CONSUMER_KEY
+from config import TWITTER_CONSUMER_SECRET
+from trading_bots.base import OrderType
+from trading_bots.base import TradeBot
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 
