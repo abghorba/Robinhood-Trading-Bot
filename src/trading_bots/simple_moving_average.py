@@ -1,7 +1,7 @@
 import pandas as pd
 
-from trading_bots.base import OrderType
-from trading_bots.base import TradeBot
+from src.trading_bots.base import OrderType
+from src.trading_bots.base import TradeBot
 
 
 class TradeBotSimpleMovingAverage(TradeBot):

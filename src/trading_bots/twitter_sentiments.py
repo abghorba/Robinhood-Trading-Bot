@@ -1,10 +1,10 @@
 import pandas as pd
 import tweepy
 
-from config import TWITTER_CONSUMER_KEY
-from config import TWITTER_CONSUMER_SECRET
-from trading_bots.base import OrderType
-from trading_bots.base import TradeBot
+from src.trading_bots.base import OrderType
+from src.trading_bots.base import TradeBot
+from src.trading_bots.configs import TWITTER_CONSUMER_KEY
+from src.trading_bots.configs import TWITTER_CONSUMER_SECRET
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 

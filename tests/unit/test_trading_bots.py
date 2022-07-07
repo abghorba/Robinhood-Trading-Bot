@@ -5,18 +5,17 @@ import random
 import robin_stocks.robinhood as robinhood
 import time
 
-from config import ROBINHOOD_USER
-from config import ROBINHOOD_PASS
-from enum import Enum
-from tests.test_configs import AAPL_STOCK_HISTORY_SAMPLE
-from tests.test_configs import FB_STOCK_HISTORY_SAMPLE
-from tests.test_configs import GOOG_STOCK_HISTORY_SAMPLE
-from tests.test_configs import STOCK_HISTORY_SAMPLE
-from tests.test_configs import TestMode
-from trading_bots.base import TradeBot
-from trading_bots.simple_moving_average import TradeBotSimpleMovingAverage
-from trading_bots.volume_weighted_average_price import TradeBotVWAP
-from trading_bots.twitter_sentiments import TradeBotSentimentAnalysis
+from src.trading_bots.base import TradeBot
+from src.trading_bots.configs import ROBINHOOD_PASS
+from src.trading_bots.configs import ROBINHOOD_USER
+from src.trading_bots.simple_moving_average import TradeBotSimpleMovingAverage
+from src.trading_bots.volume_weighted_average_price import TradeBotVWAP
+from src.trading_bots.twitter_sentiments import TradeBotSentimentAnalysis
+from tests.unit.configs import AAPL_STOCK_HISTORY_SAMPLE
+from tests.unit.configs import FB_STOCK_HISTORY_SAMPLE
+from tests.unit.configs import GOOG_STOCK_HISTORY_SAMPLE
+from tests.unit.configs import STOCK_HISTORY_SAMPLE
+from tests.unit.configs import TestMode
 
 
 # DISCLAIMER: ONLY CHANGE BELOW TEST MODE IF YOU UNDERSTAND THAT THIS TEST 
@@ -85,7 +84,6 @@ class TestTradeBot():
     )   
     def test_get_company_name_from_ticker(self, ticker, expected):
         company_name = self.trade_bot.get_company_name_from_ticker(ticker)
-        log.info(company_name)
         assert company_name == expected
 
     ##########################################################################

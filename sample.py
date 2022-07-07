@@ -1,10 +1,11 @@
 import sys
 
-from config import ROBINHOOD_USER, ROBINHOOD_PASS
-from trading_bots.base import TradeBot
-from trading_bots.simple_moving_average import TradeBotSimpleMovingAverage
-from trading_bots.volume_weighted_average_price import TradeBotVWAP
-from trading_bots.twitter_sentiments import TradeBotSentimentAnalysis
+from src.trading_bots.base import TradeBot
+from src.trading_bots.configs import ROBINHOOD_PASS
+from src.trading_bots.configs import ROBINHOOD_USER
+from src.trading_bots.simple_moving_average import TradeBotSimpleMovingAverage
+from src.trading_bots.volume_weighted_average_price import TradeBotVWAP
+from src.trading_bots.twitter_sentiments import TradeBotSentimentAnalysis
 
 
 # Usage: python sample.py <company_ticker>
@@ -12,7 +13,7 @@ from trading_bots.twitter_sentiments import TradeBotSentimentAnalysis
 def main():
 
     if len(sys.argv) != 2:
-        raise Exception
+        raise Exception("Must run as python sample.py [company_ticker]")
         
     args = sys.argv[1:]
     ticker = args[0]
