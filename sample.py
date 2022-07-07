@@ -5,7 +5,7 @@ from src.trading_bots.configs import ROBINHOOD_PASS
 from src.trading_bots.configs import ROBINHOOD_USER
 from src.trading_bots.simple_moving_average import TradeBotSimpleMovingAverage
 from src.trading_bots.volume_weighted_average_price import TradeBotVWAP
-from src.trading_bots.twitter_sentiments import TradeBotSentimentAnalysis
+from src.trading_bots.twitter_sentiments import TradeBotTwitterSentiments
 
 
 # Usage: python sample.py <company_ticker>
@@ -21,7 +21,7 @@ def main():
     tb0 = TradeBot(ROBINHOOD_USER, ROBINHOOD_PASS)
     tb1 = TradeBotSimpleMovingAverage(ROBINHOOD_USER, ROBINHOOD_PASS)
     tb2 = TradeBotVWAP(ROBINHOOD_USER, ROBINHOOD_PASS)
-    tb3 = TradeBotSentimentAnalysis(ROBINHOOD_USER, ROBINHOOD_PASS)
+    tb3 = TradeBotTwitterSentiments(ROBINHOOD_USER, ROBINHOOD_PASS)
 
     print(f"Current positions : {tb0.get_current_positions()}")
     print(f"Current cash position : ${tb0.get_current_cash_position()}")
@@ -32,7 +32,7 @@ def main():
     # Order Recommendations from the bots
     print(f"SimpleMovingAverage : {tb1.make_order_recommendation(ticker)}")
     print(f"VWAP : {tb2.make_order_recommendation(ticker)}")
-    print(f"TwitterSentiment : {tb3.make_order_recommendation(ticker)}")
+    print(f"TwitterSentiments : {tb3.make_order_recommendation(ticker)}")
 
 if __name__ == "__main__":
     main()

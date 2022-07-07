@@ -1,0 +1,30 @@
+import pandas as pd
+import pytest
+
+from src.trading_bots.configs import ROBINHOOD_PASS
+from src.trading_bots.configs import ROBINHOOD_USER
+from src.trading_bots.volume_weighted_average_price import TradeBotVWAP
+from tests.configs import AAPL_STOCK_HISTORY_SAMPLE
+from tests.configs import FB_STOCK_HISTORY_SAMPLE
+from tests.configs import GOOG_STOCK_HISTORY_SAMPLE
+
+
+class TestTradeBotVWAP():
+
+    trade_bot = TradeBotVWAP(ROBINHOOD_USER, ROBINHOOD_PASS)
+
+    ##########################################################################
+    @pytest.mark.parametrize(
+        "stock_history,expected",
+        [
+            (None, 0),
+            (pd.DataFrame(), 0),
+            (AAPL_STOCK_HISTORY_SAMPLE, 150.81), 
+            (FB_STOCK_HISTORY_SAMPLE, 336.60),
+            (GOOG_STOCK_HISTORY_SAMPLE, 2981.67),
+        ]
+    )
+    def test_calculate_VWAP(self, stock_history, expected):
+        stock_history_df = pd.DataFrame(stock_history)
+        assert self.trade_bot.calculate_VWAP(stock_history_df) == expected
+

@@ -1,20 +1,10 @@
-import logging as log
-import pandas as pd
 import pytest
-import random
 import robin_stocks.robinhood as robinhood
 import time
 
 from src.trading_bots.base import TradeBot
 from src.trading_bots.configs import ROBINHOOD_PASS
 from src.trading_bots.configs import ROBINHOOD_USER
-from src.trading_bots.simple_moving_average import TradeBotSimpleMovingAverage
-from src.trading_bots.volume_weighted_average_price import TradeBotVWAP
-from src.trading_bots.twitter_sentiments import TradeBotSentimentAnalysis
-from tests.configs import AAPL_STOCK_HISTORY_SAMPLE
-from tests.configs import FB_STOCK_HISTORY_SAMPLE
-from tests.configs import GOOG_STOCK_HISTORY_SAMPLE
-from tests.configs import STOCK_HISTORY_SAMPLE
 from tests.configs import TestMode
 
 
@@ -33,8 +23,8 @@ def slow_down_tests():
 
 class TestTradeBot():
 
-    log.warning("Be advised that this test will send REAL market orders with REAL money!")
-    log.warning("This test could also result in your account being marked for day trading!")
+    print("WARNING: Be advised that this test will send REAL market orders with REAL money!")
+    print("WARNING: This test could also result in your account being marked for day trading!")
 
     trade_bot = TradeBot(ROBINHOOD_USER, ROBINHOOD_PASS)
     current_funds = trade_bot.get_current_cash_position()
@@ -295,89 +285,3 @@ class TestTradeBot():
         if len(compiled_sale_data) > 0:
             portfolio = self.trade_bot.get_current_positions()
             assert len(portfolio) == 0
-
-
-class TestTradeBotSimpleMovingAverage():
-    
-    trade_bot = TradeBotSimpleMovingAverage(ROBINHOOD_USER, ROBINHOOD_PASS)
-    stock_history_df = pd.DataFrame(STOCK_HISTORY_SAMPLE)
-    
-    ##########################################################################
-    @pytest.mark.parametrize(
-        "stock_history,number_of_days,expected",
-        [
-            (None, None, 0),
-            (pd.DataFrame(), 10, 0),
-            (STOCK_HISTORY_SAMPLE, 0, 0),
-            (STOCK_HISTORY_SAMPLE, -1, 0),
-            (STOCK_HISTORY_SAMPLE, 25, 147.13), 
-            (STOCK_HISTORY_SAMPLE, 100, 145.87), 
-            (STOCK_HISTORY_SAMPLE, 200, 137.01),
-        ]
-    )
-    def test_calculate_simple_moving_average(self, stock_history, number_of_days, expected):
-        stock_history_df = pd.DataFrame(stock_history)
-        moving_average = self.trade_bot.calculate_simple_moving_average(stock_history_df, number_of_days)
-        assert moving_average == expected
-
-
-class TestTradeBotVWAP():
-
-    trade_bot = TradeBotVWAP(ROBINHOOD_USER, ROBINHOOD_PASS)
-
-    ##########################################################################
-    @pytest.mark.parametrize(
-        "stock_history,expected",
-        [
-            (None, 0),
-            (pd.DataFrame(), 0),
-            (AAPL_STOCK_HISTORY_SAMPLE, 150.81), 
-            (FB_STOCK_HISTORY_SAMPLE, 336.60),
-            (GOOG_STOCK_HISTORY_SAMPLE, 2981.67),
-        ]
-    )
-    def test_calculate_VWAP(self, stock_history, expected):
-        stock_history_df = pd.DataFrame(stock_history)
-        assert self.trade_bot.calculate_VWAP(stock_history_df) == expected
-
-
-class TestTradeBotSentimentAnalysis():
-
-    trade_bot = TradeBotSentimentAnalysis(ROBINHOOD_USER, ROBINHOOD_PASS)
-
-    ##########################################################################
-    @pytest.mark.parametrize(
-        "ticker,max_count",
-        [
-            ('GME', 100),
-            ('AAPL', 150),
-            ('AMZN', 200)
-        ]
-    )
-    def test_retrieve_tweets(self, ticker, max_count):
-        public_tweets = self.trade_bot.retrieve_tweets(ticker, max_count)
-
-        assert isinstance(public_tweets, list)
-        assert len(public_tweets) == max_count
-
-        company = robinhood.stocks.get_name_by_symbol(ticker)
-
-        for _ in range(5):
-            random_index = random.randint(0, max_count)
-            current_tweet = public_tweets[random_index].lower()
-            assert (company.lower() in current_tweet or 
-                    ticker.lower() in current_tweet)     
-
-    ##########################################################################
-    @pytest.mark.parametrize(
-        "ticker",
-        [
-            ('GME'),
-            ('AAPL'),
-            ('AMZN'),
-        ]
-    )
-    def test_analyze_tweet_sentiments(self, ticker):
-        public_tweets = self.trade_bot.retrieve_tweets(ticker)
-        average_sentiment_score = self.trade_bot.analyze_tweet_sentiments(public_tweets)
-        assert -1 <= average_sentiment_score <= 1

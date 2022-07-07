@@ -8,7 +8,7 @@ from src.trading_bots.configs import TWITTER_CONSUMER_SECRET
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 
-class TradeBotSentimentAnalysis(TradeBot):
+class TradeBotTwitterSentiments(TradeBot):
 
     def __init__(self, username, password):
         """Logs user into their Robinhood account."""
