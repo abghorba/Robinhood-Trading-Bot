@@ -11,11 +11,11 @@ from src.trading_bots.configs import ROBINHOOD_USER
 from src.trading_bots.simple_moving_average import TradeBotSimpleMovingAverage
 from src.trading_bots.volume_weighted_average_price import TradeBotVWAP
 from src.trading_bots.twitter_sentiments import TradeBotSentimentAnalysis
-from tests.unit.configs import AAPL_STOCK_HISTORY_SAMPLE
-from tests.unit.configs import FB_STOCK_HISTORY_SAMPLE
-from tests.unit.configs import GOOG_STOCK_HISTORY_SAMPLE
-from tests.unit.configs import STOCK_HISTORY_SAMPLE
-from tests.unit.configs import TestMode
+from tests.configs import AAPL_STOCK_HISTORY_SAMPLE
+from tests.configs import FB_STOCK_HISTORY_SAMPLE
+from tests.configs import GOOG_STOCK_HISTORY_SAMPLE
+from tests.configs import STOCK_HISTORY_SAMPLE
+from tests.configs import TestMode
 
 
 # DISCLAIMER: ONLY CHANGE BELOW TEST MODE IF YOU UNDERSTAND THAT THIS TEST 
