@@ -1,3 +1,10 @@
+from enum import Enum
+
+
+class TestMode(Enum):
+    SKIP_MARKET_ORDERS = 0
+    TEST_EVERYTHING = 1
+
 STOCK_HISTORY_SAMPLE = [
     {
         'begins_at': '2020-11-09T00:00:00Z',

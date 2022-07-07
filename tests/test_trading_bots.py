@@ -8,19 +8,15 @@ import time
 from config import ROBINHOOD_USER
 from config import ROBINHOOD_PASS
 from enum import Enum
-from tests.unit_test_configs import AAPL_STOCK_HISTORY_SAMPLE
-from tests.unit_test_configs import FB_STOCK_HISTORY_SAMPLE
-from tests.unit_test_configs import GOOG_STOCK_HISTORY_SAMPLE
-from tests.unit_test_configs import STOCK_HISTORY_SAMPLE
+from tests.test_configs import AAPL_STOCK_HISTORY_SAMPLE
+from tests.test_configs import FB_STOCK_HISTORY_SAMPLE
+from tests.test_configs import GOOG_STOCK_HISTORY_SAMPLE
+from tests.test_configs import STOCK_HISTORY_SAMPLE
+from tests.test_configs import TestMode
 from trading_bots.base import TradeBot
 from trading_bots.simple_moving_average import TradeBotSimpleMovingAverage
 from trading_bots.volume_weighted_average_price import TradeBotVWAP
 from trading_bots.twitter_sentiments import TradeBotSentimentAnalysis
-
-
-class TestMode(Enum):
-    SKIP_MARKET_ORDERS = 0
-    TEST_EVERYTHING = 1
 
 
 # DISCLAIMER: ONLY CHANGE BELOW TEST MODE IF YOU UNDERSTAND THAT THIS TEST 
