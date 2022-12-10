@@ -1,8 +1,8 @@
 import sys
 
 from src.trading_bots.base import TradeBot
-from src.trading_bots.configs import ROBINHOOD_PASS
-from src.trading_bots.configs import ROBINHOOD_USER
+from src.trading_bots.utilities import ROBINHOOD_PASS
+from src.trading_bots.utilities import ROBINHOOD_USER
 from src.trading_bots.simple_moving_average import TradeBotSimpleMovingAverage
 from src.trading_bots.volume_weighted_average_price import TradeBotVWAP
 from src.trading_bots.twitter_sentiments import TradeBotTwitterSentiments

@@ -1,5 +1,4 @@
-from src.trading_bots.base import OrderType
-from src.trading_bots.base import TradeBot
+from src.trading_bots.base import OrderType, TradeBot
 
 
 class TradeBotSkeleton(TradeBot):
@@ -21,7 +20,7 @@ class TradeBotSkeleton(TradeBot):
             print("ERROR: ticker cannot be a null value")
             return None
 
-        #TODO - Your own algoritm here!
+        # TODO - Your own algorithm here!
 
         # Determine the order recommendation.
         if 0:

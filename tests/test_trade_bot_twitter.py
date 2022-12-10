@@ -1,12 +1,11 @@
 import random
 import pytest
 
-from src.trading_bots.configs import ROBINHOOD_PASS
-from src.trading_bots.configs import ROBINHOOD_USER
+from src.trading_bots.utilities import ROBINHOOD_PASS, ROBINHOOD_USER
 from src.trading_bots.twitter_sentiments import TradeBotTwitterSentiments
 
 
-class TestTradeBotTwitterSentimentAnalysis():
+class TestTradeBotTwitterSentimentAnalysis:
 
     trade_bot = TradeBotTwitterSentiments(ROBINHOOD_USER, ROBINHOOD_PASS)
 
@@ -35,9 +34,9 @@ class TestTradeBotTwitterSentimentAnalysis():
     @pytest.mark.parametrize(
         "ticker",
         [
-            ('GME'),
-            ('AAPL'),
-            ('AMZN'),
+            'GME',
+            'AAPL',
+            'AMZN',
         ]
     )
     def test_analyze_tweet_sentiments(self, ticker):

@@ -9,7 +9,8 @@ class OrderType(Enum):
     SELL_RECOMMENDATION = 0
     HOLD_RECOMMENDATION = -1
 
-class TradeBot():
+
+class TradeBot:
 
     def __init__(self, username, password):
         """Logs user into their Robinhood account."""
@@ -71,7 +72,6 @@ class TradeBot():
             time_span not in {'day', 'week', 'month', '3month', 'year', '5year'}:
             
             return pd.DataFrame()
-
 
         stock_history = robinhood.stocks.get_stock_historicals(
             ticker,

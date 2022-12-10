@@ -1,11 +1,13 @@
 import pandas as pd
 import tweepy
 
-from src.trading_bots.base import OrderType
-from src.trading_bots.base import TradeBot
-from src.trading_bots.configs import TWITTER_CONSUMER_KEY
-from src.trading_bots.configs import TWITTER_CONSUMER_SECRET
+from src.trading_bots.base import OrderType, TradeBot
+from src.trading_bots.utilities import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+
+
+MINIMUM_CONSENSUS_BUY_SCORE = 0.05
+MINIMUM_CONSENSUS_SELL_SCORE = -0.05
 
 
 class TradeBotTwitterSentiments(TradeBot):
@@ -19,7 +21,7 @@ class TradeBotTwitterSentiments(TradeBot):
         """
         Retrieves tweets from Twitter about ticker.
 
-        ticker: A company's ticker symbol as a string
+        :param ticker: A company's ticker symbol as a string
         :param max_count: The maximum number of tweets to retrieve
         :return: A list of strings of the retrieved tweets
         """
@@ -65,8 +67,7 @@ class TradeBotTwitterSentiments(TradeBot):
 
     def analyze_tweet_sentiments(self, tweets):
         """
-        Analyzes the sentiments of each tweet and returns the average
-        sentiment.
+        Analyzes the sentiments of each tweet and returns the average sentiment.
 
         :param tweets: A list of strings containing the text from tweets
         :return: The mean of all the sentiment scores from the list of tweets
@@ -98,8 +99,7 @@ class TradeBotTwitterSentiments(TradeBot):
 
     def make_order_recommendation(self, ticker):
         """
-        Makes an order recommendation based on the sentiment of
-        max_count tweets about ticker.
+        Makes an order recommendation based on the sentiment of max_count tweets about ticker.
 
         :param ticker: A company's ticker symbol as a string
         :return: OrderType recommendation
@@ -113,12 +113,11 @@ class TradeBotTwitterSentiments(TradeBot):
         consensus_score = self.analyze_tweet_sentiments(public_tweets)
 
         # Determine the order recommendation.
-        if consensus_score >= 0.05:
+        if consensus_score >= MINIMUM_CONSENSUS_BUY_SCORE:
             return OrderType.BUY_RECOMMENDATION
 
-        elif consensus_score <= -0.05:
+        elif consensus_score <= MINIMUM_CONSENSUS_SELL_SCORE:
             return OrderType.SELL_RECOMMENDATION
 
         else:
             return OrderType.HOLD_RECOMMENDATION
-

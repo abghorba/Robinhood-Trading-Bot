@@ -3,8 +3,7 @@ import robin_stocks.robinhood as robinhood
 import time
 
 from src.trading_bots.base import TradeBot
-from src.trading_bots.configs import ROBINHOOD_PASS
-from src.trading_bots.configs import ROBINHOOD_USER
+from src.trading_bots.utilities import ROBINHOOD_PASS, ROBINHOOD_USER
 from tests.configs import TestMode
 
 
@@ -15,13 +14,14 @@ from tests.configs import TestMode
 TEST_MODE = TestMode.SKIP_MARKET_ORDERS
 MIN_CASH_TO_RUN_TEST = 5
 
+
 @pytest.fixture(autouse=True)
 def slow_down_tests():
     yield
     time.sleep(1)
 
 
-class TestTradeBot():
+class TestTradeBot:
 
     print("WARNING: Be advised that this test will send REAL market orders with REAL money!")
     print("WARNING: This test could also result in your account being marked for day trading!")
@@ -46,12 +46,12 @@ class TestTradeBot():
         "ticker",
         [
             # Invalid Parameters
-            (""),
+            "",
 
             # Valid Parameters
-            ("AAPL"),
-            ("GOOG"),
-            ("META")
+            "AAPL",
+            "GOOG",
+            "META",
         ]
     )
     def test_get_current_market_price(self, ticker):
@@ -271,11 +271,11 @@ class TestTradeBot():
     @pytest.mark.parametrize(
         "expected",
         [
-            (True),
-            (False),
+            True,
+            False,
         ]
     )
-    def test_liquidate_porfolio(self, expected):
+    def test_liquidate_portfolio(self, expected):
         """Sell out of all current holdings"""
 
         compiled_sale_data = self.trade_bot.liquidate_portfolio()

@@ -1,13 +1,12 @@
 import pandas as pd
 import pytest
 
-from src.trading_bots.configs import ROBINHOOD_PASS
-from src.trading_bots.configs import ROBINHOOD_USER
+from src.trading_bots.utilities import ROBINHOOD_PASS, ROBINHOOD_USER
 from src.trading_bots.simple_moving_average import TradeBotSimpleMovingAverage
 from tests.configs import STOCK_HISTORY_SAMPLE
 
 
-class TestTradeBotSimpleMovingAverage():
+class TestTradeBotSimpleMovingAverage:
     
     trade_bot = TradeBotSimpleMovingAverage(ROBINHOOD_USER, ROBINHOOD_PASS)
     stock_history_df = pd.DataFrame(STOCK_HISTORY_SAMPLE)
@@ -29,4 +28,3 @@ class TestTradeBotSimpleMovingAverage():
         stock_history_df = pd.DataFrame(stock_history)
         moving_average = self.trade_bot.calculate_simple_moving_average(stock_history_df, number_of_days)
         assert moving_average == expected
-

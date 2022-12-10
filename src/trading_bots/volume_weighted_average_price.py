@@ -1,7 +1,6 @@
 import pandas as pd
 
-from src.trading_bots.base import OrderType
-from src.trading_bots.base import TradeBot
+from src.trading_bots.base import OrderType, TradeBot
 
 
 class TradeBotVWAP(TradeBot):
@@ -76,4 +75,3 @@ class TradeBotVWAP(TradeBot):
 
         else:
             return OrderType.HOLD_RECOMMENDATION
-
