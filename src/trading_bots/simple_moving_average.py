@@ -32,9 +32,7 @@ class TradeBotSimpleMovingAverage(TradeBot):
             return 0
 
         # Typecast the column to numerics.
-        stock_history_df["close_price"] = pd.to_numeric(
-            stock_history_df["close_price"], errors="coerce"
-        )
+        stock_history_df["close_price"] = pd.to_numeric(stock_history_df["close_price"], errors="coerce")
 
         # Consider only the last n days.
         n_day_stock_history = stock_history_df.tail(number_of_days)
@@ -60,14 +58,10 @@ class TradeBotSimpleMovingAverage(TradeBot):
         stock_history_df = self.get_stock_history_dataframe(ticker)
 
         # Calculate the 200-day moving average.
-        moving_average_200_day = self.calculate_simple_moving_average(
-            stock_history_df, 200
-        )
+        moving_average_200_day = self.calculate_simple_moving_average(stock_history_df, 200)
 
         # Calculate the 50-day moving average.
-        moving_average_50_day = self.calculate_simple_moving_average(
-            stock_history_df, 50
-        )
+        moving_average_50_day = self.calculate_simple_moving_average(stock_history_df, 50)
 
         # Determine the order recommendation.
         if moving_average_50_day > moving_average_200_day:

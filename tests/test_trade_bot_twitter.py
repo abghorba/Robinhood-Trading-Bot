@@ -22,9 +22,7 @@ class TestTradeBotTwitterSentimentAnalysis:
         for _ in range(5):
             random_index = random.randint(0, len(public_tweets))
             current_tweet = public_tweets[random_index].lower()
-            assert (
-                company_name.lower() in current_tweet or ticker.lower() in current_tweet
-            )
+            assert company_name.lower() in current_tweet or ticker.lower() in current_tweet
 
     ##########################################################################
     @pytest.mark.parametrize(

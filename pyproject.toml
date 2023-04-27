@@ -1,5 +1,5 @@
-[tools.black]
+[tool.black]
 line-length = 120
 
-[tools.isort]
+[tool.isort]
 line_length = 120

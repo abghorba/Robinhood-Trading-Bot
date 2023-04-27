@@ -26,12 +26,8 @@ class TradeBotVWAP(TradeBot):
             return 0
 
         # Typecast the columns we need.
-        stock_history_df["close_price"] = pd.to_numeric(
-            stock_history_df["close_price"], errors="coerce"
-        )
-        stock_history_df["volume"] = pd.to_numeric(
-            stock_history_df["volume"], errors="coerce"
-        )
+        stock_history_df["close_price"] = pd.to_numeric(stock_history_df["close_price"], errors="coerce")
+        stock_history_df["volume"] = pd.to_numeric(stock_history_df["volume"], errors="coerce")
 
         # Sum the volumes, and take the dot product of the volume and close_price columns.
         sum_of_volumes = stock_history_df["volume"].sum()
@@ -57,9 +53,7 @@ class TradeBotVWAP(TradeBot):
             return None
 
         # Calculate the VWAP from the last day in 5 minute intervals.
-        stock_history_df = self.get_stock_history_dataframe(
-            ticker, interval="5minute", time_span="day"
-        )
+        stock_history_df = self.get_stock_history_dataframe(ticker, interval="5minute", time_span="day")
 
         vwap = self.calculate_VWAP(stock_history_df)
 

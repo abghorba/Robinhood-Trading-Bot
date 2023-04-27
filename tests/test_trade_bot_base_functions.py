@@ -21,12 +21,8 @@ def slow_down_tests():
 
 
 class TestTradeBot:
-    print(
-        "WARNING: Be advised that this test will send REAL market orders with REAL money!"
-    )
-    print(
-        "WARNING: This test could also result in your account being marked for day trading!"
-    )
+    print("WARNING: Be advised that this test will send REAL market orders with REAL money!")
+    print("WARNING: This test could also result in your account being marked for day trading!")
 
     trade_bot = TradeBot()
     current_funds = trade_bot.get_current_cash_position()
@@ -99,9 +95,7 @@ class TestTradeBot:
             # Use default parameters of interval="day" and time_span="year"
             stock_history_df = self.trade_bot.get_stock_history_dataframe(ticker)
         else:
-            stock_history_df = self.trade_bot.get_stock_history_dataframe(
-                ticker, interval="day", time_span="year"
-            )
+            stock_history_df = self.trade_bot.get_stock_history_dataframe(ticker, interval="day", time_span="year")
 
         assert not stock_history_df.empty if ticker else stock_history_df.empty
 
@@ -110,9 +104,7 @@ class TestTradeBot:
         TEST_MODE == TestMode.SKIP_MARKET_ORDERS,
         reason="Current TestMode selected will skip this test!",
     )
-    @pytest.mark.skipif(
-        not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!"
-    )
+    @pytest.mark.skipif(not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!")
     @pytest.mark.parametrize(
         "amount_in_dollars,expected",
         [
@@ -139,9 +131,7 @@ class TestTradeBot:
         TEST_MODE == TestMode.SKIP_MARKET_ORDERS,
         reason="Current TestMode selected will skip this test!",
     )
-    @pytest.mark.skipif(
-        not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!"
-    )
+    @pytest.mark.skipif(not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!")
     @pytest.mark.parametrize(
         "ticker,amount_in_dollars,expected",
         [
@@ -167,9 +157,7 @@ class TestTradeBot:
         TEST_MODE == TestMode.SKIP_MARKET_ORDERS,
         reason="Current TestMode selected will skip this test!",
     )
-    @pytest.mark.skipif(
-        not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!"
-    )
+    @pytest.mark.skipif(not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!")
     @pytest.mark.parametrize(
         "ticker,amount_in_dollars,expected",
         [
@@ -194,9 +182,7 @@ class TestTradeBot:
         TEST_MODE == TestMode.SKIP_MARKET_ORDERS,
         reason="Current TestMode selected will skip this test!",
     )
-    @pytest.mark.skipif(
-        not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!"
-    )
+    @pytest.mark.skipif(not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!")
     @pytest.mark.parametrize(
         "ticker,amount_in_dollars,expected",
         [
@@ -226,12 +212,8 @@ class TestTradeBot:
         TEST_MODE == TestMode.SKIP_MARKET_ORDERS,
         reason="Current TestMode selected will skip this test!",
     )
-    @pytest.mark.skipif(
-        not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!"
-    )
-    @pytest.mark.parametrize(
-        "ticker,expected", [("", False), ("MSFT", True), ("AMZN", False)]
-    )
+    @pytest.mark.skipif(not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!")
+    @pytest.mark.parametrize("ticker,expected", [("", False), ("MSFT", True), ("AMZN", False)])
     def test_buy_with_available_funds(self, ticker, expected):
         """Commit all available funds to a position in MSFT"""
 
@@ -240,9 +222,7 @@ class TestTradeBot:
 
         # Check that all the funds were used.
         if len(purchase_data) > 0:
-            available_funds = float(
-                robinhood.profiles.load_account_profile(info="buying_power")
-            )
+            available_funds = float(robinhood.profiles.load_account_profile(info="buying_power"))
             assert available_funds == 0
 
     ##########################################################################
@@ -250,12 +230,8 @@ class TestTradeBot:
         TEST_MODE == TestMode.SKIP_MARKET_ORDERS,
         reason="Current TestMode selected will skip this test!",
     )
-    @pytest.mark.skipif(
-        not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!"
-    )
-    @pytest.mark.parametrize(
-        "ticker,expected", [("", False), ("MSFT", True), ("MSFT", False)]
-    )
+    @pytest.mark.skipif(not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!")
+    @pytest.mark.parametrize("ticker,expected", [("", False), ("MSFT", True), ("MSFT", False)])
     def test_sell_entire_position(self, ticker, expected):
         """Completely sell out of the position in MSFT"""
 
@@ -272,9 +248,7 @@ class TestTradeBot:
         TEST_MODE == TestMode.SKIP_MARKET_ORDERS,
         reason="Current TestMode selected will skip this test!",
     )
-    @pytest.mark.skipif(
-        not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!"
-    )
+    @pytest.mark.skipif(not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!")
     @pytest.mark.parametrize(
         "expected",
         [

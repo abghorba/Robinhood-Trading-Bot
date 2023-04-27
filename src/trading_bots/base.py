@@ -4,11 +4,7 @@ import pandas as pd
 import pyotp
 import robin_stocks.robinhood as robinhood
 
-from src.trading_bots.utilities import (
-    ROBINHOOD_MFA_CODE,
-    ROBINHOOD_PASS,
-    ROBINHOOD_USER,
-)
+from src.trading_bots.utilities import ROBINHOOD_MFA_CODE, ROBINHOOD_PASS, ROBINHOOD_USER
 
 
 class OrderType(Enum):
@@ -61,9 +57,7 @@ class TradeBot:
         if not ticker:
             return 0.00
 
-        return float(
-            robinhood.stocks.get_latest_price(ticker, includeExtendedHours=False)[0]
-        )
+        return float(robinhood.stocks.get_latest_price(ticker, includeExtendedHours=False)[0])
 
     def get_company_name_from_ticker(self, ticker):
         """
@@ -96,9 +90,7 @@ class TradeBot:
         ):
             return pd.DataFrame()
 
-        stock_history = robinhood.stocks.get_stock_historicals(
-            ticker, interval=interval, span=time_span
-        )
+        stock_history = robinhood.stocks.get_stock_historicals(ticker, interval=interval, span=time_span)
 
         return pd.DataFrame(stock_history)
 
@@ -319,8 +311,6 @@ class TradeBot:
             transaction_data.update(sale_details)
 
         else:
-            print(
-                f"Conditions are not met for either a purchase or a sale of {ticker}."
-            )
+            print(f"Conditions are not met for either a purchase or a sale of {ticker}.")
 
         return transaction_data
