@@ -2,11 +2,10 @@ from src.trading_bots.base import OrderType, TradeBot
 
 
 class TradeBotSkeleton(TradeBot):
-
-    def __init__(self, username, password):
+    def __init__(self):
         """Logs user into their Robinhood account."""
-        
-        super().__init__(username, password)
+
+        super().__init__()
 
     def make_order_recommendation(self, ticker):
         """

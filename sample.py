@@ -1,20 +1,17 @@
 import sys
 
 from src.trading_bots.base import TradeBot
-from src.trading_bots.utilities import ROBINHOOD_PASS
-from src.trading_bots.utilities import ROBINHOOD_USER
 from src.trading_bots.simple_moving_average import TradeBotSimpleMovingAverage
-from src.trading_bots.volume_weighted_average_price import TradeBotVWAP
 from src.trading_bots.twitter_sentiments import TradeBotTwitterSentiments
-
+from src.trading_bots.volume_weighted_average_price import TradeBotVWAP
 
 # Usage: python sample.py <company_ticker>
 
-def main():
 
+def main():
     if len(sys.argv) != 2:
         raise Exception("Must run as python sample.py [company_ticker]")
-        
+
     args = sys.argv[1:]
     ticker = args[0]
 
@@ -33,6 +30,7 @@ def main():
     print(f"SimpleMovingAverage : {tb1.make_order_recommendation(ticker)}")
     print(f"VWAP : {tb2.make_order_recommendation(ticker)}")
     print(f"TwitterSentiments : {tb3.make_order_recommendation(ticker)}")
+
 
 if __name__ == "__main__":
     main()

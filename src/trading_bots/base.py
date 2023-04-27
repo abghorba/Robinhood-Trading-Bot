@@ -1,7 +1,14 @@
+from enum import Enum
+
 import pandas as pd
+import pyotp
 import robin_stocks.robinhood as robinhood
 
-from enum import Enum
+from src.trading_bots.utilities import (
+    ROBINHOOD_MFA_CODE,
+    ROBINHOOD_PASS,
+    ROBINHOOD_USER,
+)
 
 
 class OrderType(Enum):
@@ -11,11 +18,23 @@ class OrderType(Enum):
 
 
 class TradeBot:
-
-    def __init__(self, username, password):
+    def __init__(self):
         """Logs user into their Robinhood account."""
-        
-        robinhood.login(username, password)
+
+        totp = None
+
+        if ROBINHOOD_MFA_CODE == "":
+            print(
+                "WARNING: MFA code is not supplied. Multi-factor authentication will not be attempted. If your "
+                "Robinhood account uses MFA to log in, this will fail and may lock you out of your accounts for "
+                "some period of time."
+            )
+
+        else:
+            totp = pyotp.TOTP(ROBINHOOD_MFA_CODE).now()
+
+        login_info = robinhood.login(ROBINHOOD_USER, ROBINHOOD_PASS, mfa_code=totp)
+        print(login_info["detail"])
 
     def robinhood_logout(self):
         """Logs user out of their Robinhood account."""
@@ -34,7 +53,7 @@ class TradeBot:
 
     def get_current_market_price(self, ticker):
         """Returns the current market price of ticker
-        
+
         :param ticker: A company's symbol as a string
         :return: Current market price in USD
         """
@@ -42,12 +61,14 @@ class TradeBot:
         if not ticker:
             return 0.00
 
-        return float(robinhood.stocks.get_latest_price(ticker, includeExtendedHours=False)[0])
+        return float(
+            robinhood.stocks.get_latest_price(ticker, includeExtendedHours=False)[0]
+        )
 
     def get_company_name_from_ticker(self, ticker):
         """
         Returns the company name represented by ticker.
-        
+
         :param ticker: A company's ticker symbol as a string
         :return: Company name as a string
         """
@@ -62,29 +83,29 @@ class TradeBot:
         information.
 
         :param ticker: A company's ticker symbol as a string
-        :param interval: time intervals for data points; Values are '5minute', 
+        :param interval: time intervals for data points; Values are '5minute',
         '10minute', 'hour', 'day', or 'week'. Default is 'day'
         :param time_span: time span for the data points: Values are 'day',
         'week', 'month', '3month', 'year', or '5year'. Default is 'year'
         :return: DataFrame of stock historical information
         """
-        if not ticker or interval not in {'5minute', '10minute', 'hour', 'day', 'week'} or \
-            time_span not in {'day', 'week', 'month', '3month', 'year', '5year'}:
-            
+        if (
+            not ticker
+            or interval not in {"5minute", "10minute", "hour", "day", "week"}
+            or time_span not in {"day", "week", "month", "3month", "year", "5year"}
+        ):
             return pd.DataFrame()
 
         stock_history = robinhood.stocks.get_stock_historicals(
-            ticker,
-            interval=interval,
-            span=time_span
+            ticker, interval=interval, span=time_span
         )
 
         return pd.DataFrame(stock_history)
-    
+
     def get_equity_in_position(self, ticker):
         """
         Returns the dollar value of the equity in the position
-        
+
         :param ticker: A company's ticker symbol as a string
         :return: float
         """
@@ -94,7 +115,7 @@ class TradeBot:
         if ticker in portfolio:
             position = portfolio[ticker]
             return float(position["equity"])
-        
+
         return -1
 
     def has_sufficient_funds_available(self, amount_in_dollars):
@@ -175,7 +196,7 @@ class TradeBot:
 
 
         :param ticker: A company's ticker symbol
-        :param amount_in_dollars: The amount in USD to be used for the sale     
+        :param amount_in_dollars: The amount in USD to be used for the sale
         :return: Dict containing information regarding the
         sale of stocks, such as the order id, the state
         of order (queued, confired, filled, failed, canceled,

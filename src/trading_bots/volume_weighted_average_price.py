@@ -4,10 +4,10 @@ from src.trading_bots.base import OrderType, TradeBot
 
 
 class TradeBotVWAP(TradeBot):
-    def __init__(self, username, password):
+    def __init__(self):
         """Logs user into their Robinhood account."""
-        
-        super().__init__(username, password)
+
+        super().__init__()
 
     def calculate_VWAP(self, stock_history_df):
         """
@@ -57,10 +57,10 @@ class TradeBotVWAP(TradeBot):
             return None
 
         # Calculate the VWAP from the last day in 5 minute intervals.
-        stock_history_df = self.get_stock_history_dataframe(ticker, 
-                                                            interval="5minute",
-                                                            time_span="day")
-        
+        stock_history_df = self.get_stock_history_dataframe(
+            ticker, interval="5minute", time_span="day"
+        )
+
         vwap = self.calculate_VWAP(stock_history_df)
 
         # Get the current market price of the stock.

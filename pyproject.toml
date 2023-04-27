@@ -1,0 +1,5 @@
+[tools.black]
+line-length = 120
+
+[tools.isort]
+line_length = 120

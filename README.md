@@ -1,18 +1,18 @@
 # Robinhood Trading Bot
 A Python trading bot that uses Robinhood to execute market orders based on various trading algorithms.
 
-<h2> Algorithm Explanations </h2>
+<h2> Sample Algorithm Explanations </h2>
 
 <h3> Moving Day Average Comparison </h3>
 First, the 50-day and 200-day moving averages are calculated using historical stock prices. 
 A buy order recommendation is made when the 50-day moving average is strictly greater than the 200-day moving average.
 A sell order recommendation is made when the 50-day moving average is strictly less than the 200-day moving average.
-No recommendation is amde when the two moving averages are equal.
+No recommendation is made when the two moving averages are equal.
 
 <h3> Volume-Weighted Average Price Comparison </h3>
 The Volume-Weighted Average Price (VWAP) is calculated by adding up the dollars traded for every transaction in a period (price times number of shares traded)
 and then dividing by the total shares traded in the period. When the current price of a security is below the VWAP, a buy recommendation is made.
-A sell recommendation is made when the currentprice of a security is above the VWAP. If neither conditions are met, no recommendation is made.
+A sell recommendation is made when the current price of a security is above the VWAP. If neither conditions are met, no recommendation is made.
 
 <h3> Sentiment Analysis </h3>
 This algorithm sources tweets from the Twitter API that mention a company's name. A sentiment analysis is performed on each tweet and a score is assigned
@@ -22,12 +22,21 @@ is made.
 
 
 <h2> Setting Up </h2>
-You will need to have a Robinhood account and a Twitter API key. Navigate to initialize.sh and populate the following:
+You will need to have a Robinhood account and a Twitter API key.
+
+It is up to you to decide if you want Multi-Factor Authentication (MFA) enabled on your Robinhood account.
+To set up MFA, log into your Robinhood account and navigate to Menu > Security and privacy > Two-Factor Authentication.
+Choose "Authenticator App" as your form of MFA. You can use Duo Mobile, Google Authenticator, whatever you like. Copy the
+key that Robinhood provides you. This is the MFA token you need in order to generate a time-based one-time password (TOTP).
+Use this in any authenticator app of your choice to enable it. This key will also be used below in the ROBINHOOD_MFA_CODE variable.
+
+Navigate to initialize.sh and populate the following:
 
         TWITTER_CONSUMER_KEY=""
         TWITTER_CONSUMER_SECRET=""
         ROBINHOOD_USER=""
         ROBINHOOD_PASS=""
+        ROBINHOOD_MFA_CODE=""
 
 After this is done, you can create a virtual environment, install dependencies, and create your .env file by running:
 

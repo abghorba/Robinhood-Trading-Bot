@@ -1,21 +1,19 @@
 import pandas as pd
 import tweepy
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 from src.trading_bots.base import OrderType, TradeBot
 from src.trading_bots.utilities import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-
 
 MINIMUM_CONSENSUS_BUY_SCORE = 0.05
 MINIMUM_CONSENSUS_SELL_SCORE = -0.05
 
 
 class TradeBotTwitterSentiments(TradeBot):
-
-    def __init__(self, username, password):
+    def __init__(self):
         """Logs user into their Robinhood account."""
-        
-        super().__init__(username, password)
+
+        super().__init__()
 
     def retrieve_tweets(self, ticker, max_count=100):
         """
@@ -45,21 +43,22 @@ class TradeBotTwitterSentiments(TradeBot):
         query = f"#{company_name} OR ${ticker}"
 
         # Search for max_counts tweets mentioning the company.
-        public_tweets = tweepy.Cursor(api.search_tweets,
-                                      q=query,
-                                      lang="en",
-                                      result_type="recent",
-                                      tweet_mode="extended").items(max_count)
+        public_tweets = tweepy.Cursor(
+            api.search_tweets,
+            q=query,
+            lang="en",
+            result_type="recent",
+            tweet_mode="extended",
+        ).items(max_count)
 
         # Extract the text body of each tweet.
         searched_tweets = []
 
         for tweet in public_tweets:
-
             try:
                 searched_tweets.append(tweet.retweeted_status.full_text)
 
-            # Not a Retweet    
+            # Not a Retweet
             except AttributeError:
                 searched_tweets.append(tweet.full_text)
 
@@ -88,8 +87,9 @@ class TradeBotTwitterSentiments(TradeBot):
         for tweet in tweets:
             score = analyzer.polarity_scores(tweet)["compound"]
             tweet_sentiment = {"tweet": tweet, "sentiment_score": score}
-            tweet_sentiments_df = tweet_sentiments_df.append(
-                tweet_sentiment, ignore_index=True
+            tweet_sentiments_df = pd.concat(
+                [tweet_sentiments_df, pd.DataFrame([tweet_sentiment])],
+                ignore_index=True,
             )
 
         # Calculate the average sentiment score.

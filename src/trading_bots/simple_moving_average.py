@@ -4,11 +4,10 @@ from src.trading_bots.base import OrderType, TradeBot
 
 
 class TradeBotSimpleMovingAverage(TradeBot):
-
-    def __init__(self, username, password):
+    def __init__(self):
         """Logs user into their Robinhood account."""
-        
-        super().__init__(username, password)
+
+        super().__init__()
 
     def calculate_simple_moving_average(self, stock_history_df, number_of_days):
         """
