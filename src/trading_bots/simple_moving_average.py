@@ -11,8 +11,7 @@ class TradeBotSimpleMovingAverage(TradeBot):
 
     def calculate_simple_moving_average(self, stock_history_df, number_of_days):
         """
-        Calculates the simple moving average based
-        on the number of days.
+        Calculates the simple moving average based on the number of days.
 
         :param stock_history_df: DataFrame containing the stock's history
         :param number_of_days: Number of days used to calculate the n-day moving average
@@ -44,8 +43,7 @@ class TradeBotSimpleMovingAverage(TradeBot):
 
     def make_order_recommendation(self, ticker):
         """
-        Makes a recommendation for a market order by comparing
-        the 50-day moving average to the 200-day moving average
+        Makes a recommendation for a market order by comparing the 50-day moving average to the 200-day moving average.
 
         :param ticker: A company's ticker symbol as a string=
         :return: OrderType recommendation

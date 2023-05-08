@@ -40,8 +40,7 @@ class TradeBotVWAP(TradeBot):
 
     def make_order_recommendation(self, ticker):
         """
-        Makes a recommendation for a market order by comparing
-        the Volume-Weighted Average Price (VWAP) to the current
+        Makes a recommendation for a market order by comparing the Volume-Weighted Average Price (VWAP) to the current
         market price.
 
         :param ticker: A company's ticker symbol as a string

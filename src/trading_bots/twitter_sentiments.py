@@ -82,8 +82,7 @@ class TradeBotTwitterSentiments(TradeBot):
         column_names = ["tweet", "sentiment_score"]
         tweet_sentiments_df = pd.DataFrame(columns=column_names)
 
-        # Get the sentiment score for each tweet and append the text
-        # and sentiment_score into the DataFrame.
+        # Get the sentiment score for each tweet and append the text and sentiment_score into the DataFrame.
         for tweet in tweets:
             score = analyzer.polarity_scores(tweet)["compound"]
             tweet_sentiment = {"tweet": tweet, "sentiment_score": score}

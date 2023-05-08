@@ -15,10 +15,10 @@ def main():
     args = sys.argv[1:]
     ticker = args[0]
 
-    tb0 = TradeBot(ROBINHOOD_USER, ROBINHOOD_PASS)
-    tb1 = TradeBotSimpleMovingAverage(ROBINHOOD_USER, ROBINHOOD_PASS)
-    tb2 = TradeBotVWAP(ROBINHOOD_USER, ROBINHOOD_PASS)
-    tb3 = TradeBotTwitterSentiments(ROBINHOOD_USER, ROBINHOOD_PASS)
+    tb0 = TradeBot()
+    tb1 = TradeBotSimpleMovingAverage()
+    tb2 = TradeBotVWAP()
+    tb3 = TradeBotTwitterSentiments()
 
     print(f"Current positions : {tb0.get_current_positions()}")
     print(f"Current cash position : ${tb0.get_current_cash_position()}")

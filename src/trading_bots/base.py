@@ -48,7 +48,8 @@ class TradeBot:
         return float(robinhood.profiles.load_account_profile(info="buying_power"))
 
     def get_current_market_price(self, ticker):
-        """Returns the current market price of ticker
+        """
+        Returns the current market price of ticker
 
         :param ticker: A company's symbol as a string
         :return: Current market price in USD
@@ -66,6 +67,7 @@ class TradeBot:
         :param ticker: A company's ticker symbol as a string
         :return: Company name as a string
         """
+
         if not ticker:
             return ""
 
@@ -73,14 +75,13 @@ class TradeBot:
 
     def get_stock_history_dataframe(self, ticker, interval="day", time_span="year"):
         """
-        Sends request to the Robinhood API to retrieve historical stock
-        information.
+        Sends request to the Robinhood API to retrieve historical stock information.
 
         :param ticker: A company's ticker symbol as a string
-        :param interval: time intervals for data points; Values are '5minute',
-        '10minute', 'hour', 'day', or 'week'. Default is 'day'
-        :param time_span: time span for the data points: Values are 'day',
-        'week', 'month', '3month', 'year', or '5year'. Default is 'year'
+        :param interval: time intervals for data points; Values are "5minute", "10minute", "hour", "day",
+         or "week". Default is "day"
+        :param time_span: time span for the data points: Values are "day", "week", "month", "3month", "year", or
+        "5year". Default is "year"
         :return: DataFrame of stock historical information
         """
         if (
@@ -96,7 +97,7 @@ class TradeBot:
 
     def get_equity_in_position(self, ticker):
         """
-        Returns the dollar value of the equity in the position
+        Returns the dollar value of the equity in the position.
 
         :param ticker: A company's ticker symbol as a string
         :return: float
@@ -112,8 +113,7 @@ class TradeBot:
 
     def has_sufficient_funds_available(self, amount_in_dollars):
         """
-        Returns a boolean if user's account has enough buying
-        power to execute a buy order.
+        Returns a boolean if user's account has enough buying power to execute a buy order.
 
         :param amount_in_dollars: The amount in USD to be used for a transaction
         :return: True if there are sufficient funds in user's account; False otherwise
@@ -129,8 +129,7 @@ class TradeBot:
 
     def has_sufficient_equity(self, ticker, amount_in_dollars):
         """
-        Returns a boolean if user's account has enough equity in
-        the given position to execute a sell order.
+        Returns a boolean if user's account has enough equity in the given position to execute a sell order.
 
         :param ticker: A company's ticker symbol as a string
         :param amount_in_dollars: The amount in USD to be used for a transaction
@@ -150,10 +149,8 @@ class TradeBot:
 
         :param ticker: A company's ticker symbol as a string
         :param amount_in_dollars: The amount in USD to be used for the purchase
-        :return: Dict containaing information regarding the
-        purchase of stocks, such as the order id, the state
-        of order (queued, confired, filled, failed, canceled,
-        etc.), the price, and the quantity.
+        :return: Dict containing information regarding the purchase of stocks, such as the order id, the state
+        of order (queued, confirmed, filled, failed, canceled, etc.), the price, and the quantity.
         """
 
         purchase_data = {}
@@ -186,13 +183,10 @@ class TradeBot:
         """
         Places a sell order for ticker with a specified amount.
 
-
         :param ticker: A company's ticker symbol
         :param amount_in_dollars: The amount in USD to be used for the sale
-        :return: Dict containing information regarding the
-        sale of stocks, such as the order id, the state
-        of order (queued, confired, filled, failed, canceled,
-        etc.), the price, and the quantity
+        :return: Dict containing information regarding the sale of stocks, such as the order id, the state of order
+        (queued, confirmed, filled, failed, canceled, etc.), the price, and the quantity
         """
 
         sale_data = {}
@@ -226,10 +220,8 @@ class TradeBot:
         Buys ticker with all available funds.
 
         :param ticker: A company's ticker symbol as a string
-        :return: Dict containing information regarding the
-        purchase of stocks, such as the order id, the state
-        of order (queued, confired, filled, failed, canceled,
-        etc.), the price, and the quantity
+        :return: Dict containing information regarding the purchase of stocks, such as the order id, the state
+        of order (queued, confirmed, filled, failed, canceled, etc.), the price, and the quantity
         """
 
         if not ticker:
@@ -244,10 +236,8 @@ class TradeBot:
         Sells user's entire position in ticker.
 
         :param ticker: A company's ticker symbol as a string
-        :return: Dict containing information regarding the
-        sale of stocks, such as the order id, the state
-        of order (queued, confired, filled, failed, canceled,
-        etc.), the price, and the quantity
+        :return: Dict containing information regarding the sale of stocks, such as the order id, the state
+        of order (queued, confirmed, filled, failed, canceled, etc.), the price, and the quantity
         """
 
         if not ticker:
@@ -261,11 +251,9 @@ class TradeBot:
         """
         Completely sells all positions held.
 
-        :return: A list of dictionaries containing information
-        regarding the sale of each stock held in the portfolio,
-        such as the order id, the state of order (queued, confired,
-        filled, failed, canceled, etc.), the price, and the quantity
-        for each position held.
+        :return: A list of dictionaries containing information regarding the sale of each stock held in the portfolio,
+        such as the order id, the state of order (queued, confirmed, filled, failed, canceled, etc.), the price, and
+        the quantity for each position held.
         """
 
         compiled_sale_information = []
@@ -278,7 +266,8 @@ class TradeBot:
         return compiled_sale_information
 
     def make_order_recommendation(self, ticker):
-        """Makes an order recommendation for the given ticker.
+        """
+        Makes an order recommendation for the given ticker.
 
         :param ticker: A company's ticker symbol as a string
         :return: Order recommendation
@@ -292,10 +281,8 @@ class TradeBot:
 
         :param ticker: A company's ticker symbol as a string
         :param amount_in_dollars: The amount in USD to be used for a transaction
-        :return: Dict containing information regarding the
-        purchase/sale of stocks, such as the order id, the
-        state of order (queued, confired, filled, failed,
-        canceled, etc.), the price, and the quantity.
+        :return: Dict containing information regarding the purchase/sale of stocks, such as the order id, the state of
+        order (queued, confirmed, filled, failed, canceled, etc.), the price, and the quantity.
         """
 
         transaction_data = {}
