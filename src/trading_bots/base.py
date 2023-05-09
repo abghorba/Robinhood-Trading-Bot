@@ -47,6 +47,22 @@ class TradeBot:
 
         return float(robinhood.profiles.load_account_profile(info="buying_power"))
 
+    def has_sufficient_funds_available(self, amount_in_dollars):
+        """
+        Returns a boolean if user's account has enough buying power to execute a buy order.
+
+        :param amount_in_dollars: The amount in USD to be used for a transaction
+        :return: True if there are sufficient funds in user's account; False otherwise
+        """
+
+        if not amount_in_dollars:
+            return False
+
+        # Retrieve the available funds.
+        available_funds = self.get_current_cash_position()
+
+        return available_funds >= amount_in_dollars
+
     def get_current_market_price(self, ticker):
         """
         Returns the current market price of ticker
@@ -109,23 +125,7 @@ class TradeBot:
             position = portfolio[ticker]
             return float(position["equity"])
 
-        return -1
-
-    def has_sufficient_funds_available(self, amount_in_dollars):
-        """
-        Returns a boolean if user's account has enough buying power to execute a buy order.
-
-        :param amount_in_dollars: The amount in USD to be used for a transaction
-        :return: True if there are sufficient funds in user's account; False otherwise
-        """
-
-        if not amount_in_dollars:
-            return False
-
-        # Retrieve the available funds.
-        available_funds = self.get_current_cash_position()
-
-        return available_funds >= amount_in_dollars
+        return 0
 
     def has_sufficient_equity(self, ticker, amount_in_dollars):
         """

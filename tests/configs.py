@@ -2,8 +2,14 @@ from enum import Enum
 
 
 class TestMode(Enum):
-    SKIP_MARKET_ORDERS = 0
-    TEST_EVERYTHING = 1
+    # Skips all market orders
+    SKIP_ALL_MARKET_ORDERS = 0
+
+    # Skips testing buy_with_available_funds(), sell_entire_position(), and liquidate_portfolio()
+    TEST_BASIC_MARKET_ORDERS = 1
+
+    # Tests everything. Understand that selecting this option will cause you to liquidate all positions.
+    TEST_EVERYTHING = 2
 
 
 STOCK_HISTORY_SAMPLE = [
