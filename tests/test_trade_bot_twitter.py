@@ -19,7 +19,7 @@ class TestTradeBotTwitterSentimentAnalysis:
         assert len(public_tweets) == max_count
 
         for _ in range(5):
-            random_index = random.randint(0, len(public_tweets))
+            random_index = random.randint(0, len(public_tweets) - 1)
             current_tweet = public_tweets[random_index].lower()
             assert company_name.lower() in current_tweet or ticker.lower() in current_tweet
 

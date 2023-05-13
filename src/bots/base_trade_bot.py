@@ -4,7 +4,7 @@ import pandas as pd
 import pyotp
 import robin_stocks.robinhood as robinhood
 
-from src.utilities import ROBINHOOD_MFA_CODE, ROBINHOOD_PASS, ROBINHOOD_USER
+from src.utilities import RobinhoodAuth
 
 
 class OrderType(Enum):
@@ -17,9 +17,10 @@ class TradeBot:
     def __init__(self):
         """Logs user into their Robinhood account."""
 
+        robinhood_auth = RobinhoodAuth()
         totp = None
 
-        if ROBINHOOD_MFA_CODE == "":
+        if robinhood_auth.mfa_code == "":
             print(
                 "WARNING: MFA code is not supplied. Multi-factor authentication will not be attempted. If your "
                 "Robinhood account uses MFA to log in, this will fail and may lock you out of your accounts for "
@@ -27,15 +28,14 @@ class TradeBot:
             )
 
         else:
-            totp = pyotp.TOTP(ROBINHOOD_MFA_CODE).now()
+            totp = pyotp.TOTP(robinhood_auth.mfa_code).now()
 
-        login_info = robinhood.login(ROBINHOOD_USER, ROBINHOOD_PASS, mfa_code=totp)
-        print(login_info["detail"])
+        robinhood.login(robinhood_auth.user, robinhood_auth.password, mfa_code=totp)
 
     def robinhood_logout(self):
         """Logs user out of their Robinhood account."""
 
-        return robinhood.logout()
+        robinhood.logout()
 
     def get_current_positions(self):
         """Returns a dictionary of currently held positions."""

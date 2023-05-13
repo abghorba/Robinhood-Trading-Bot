@@ -5,9 +5,15 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-TWITTER_CONSUMER_KEY = os.getenv("TWITTER_CONSUMER_KEY")
-TWITTER_CONSUMER_SECRET = os.getenv("TWITTER_CONSUMER_SECRET")
 
-ROBINHOOD_USER = os.getenv("ROBINHOOD_USER")
-ROBINHOOD_PASS = os.getenv("ROBINHOOD_PASS")
-ROBINHOOD_MFA_CODE = os.getenv("ROBINHOOD_MFA_CODE")
+class TwitterAuth:
+    def __init__(self):
+        self.consumer_key = os.getenv("TWITTER_CONSUMER_KEY")
+        self.consumer_secret = os.getenv("TWITTER_CONSUMER_SECRET")
+
+
+class RobinhoodAuth:
+    def __init__(self):
+        self.user = os.getenv("ROBINHOOD_USER")
+        self.password = os.getenv("ROBINHOOD_PASS")
+        self.mfa_code = os.getenv("ROBINHOOD_MFA_CODE")

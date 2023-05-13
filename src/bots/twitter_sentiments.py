@@ -3,7 +3,7 @@ import tweepy
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 from src.bots.base_trade_bot import OrderType, TradeBot
-from src.utilities import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
+from src.utilities import TwitterAuth
 
 MINIMUM_CONSENSUS_BUY_SCORE = 0.05
 MINIMUM_CONSENSUS_SELL_SCORE = -0.05
@@ -14,6 +14,14 @@ class TradeBotTwitterSentiments(TradeBot):
         """Logs user into their Robinhood account."""
 
         super().__init__()
+
+        # Connect to the Twitter API
+        twitter_auth = TwitterAuth()
+        auth = tweepy.AppAuthHandler(twitter_auth.consumer_key, twitter_auth.consumer_secret)
+        self.twitter_api = tweepy.API(auth)
+
+        # Set up the sentiment analyzer
+        self.sentiment_analyzer = SentimentIntensityAnalyzer()
 
     def retrieve_tweets(self, ticker, max_count=100):
         """
@@ -34,17 +42,13 @@ class TradeBotTwitterSentiments(TradeBot):
             print("ERROR: max_count must be a positive number.")
             return searched_tweets
 
-        # Connect to the Twitter API.
-        auth = tweepy.AppAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-        api = tweepy.API(auth)
-
         # Retrieve the company name represented by ticker.
         company_name = self.get_company_name_from_ticker(ticker)
         query = f"#{company_name} OR ${ticker}"
 
         # Search for max_counts tweets mentioning the company.
         public_tweets = tweepy.Cursor(
-            api.search_tweets,
+            self.twitter_api.search_tweets,
             q=query,
             lang="en",
             result_type="recent",
@@ -76,15 +80,13 @@ class TradeBotTwitterSentiments(TradeBot):
             print("ERROR: param tweets cannot be a null value")
             return 0
 
-        analyzer = SentimentIntensityAnalyzer()
-
         # Initialize an empty DataFrame.
         column_names = ["tweet", "sentiment_score"]
         tweet_sentiments_df = pd.DataFrame(columns=column_names)
 
         # Get the sentiment score for each tweet and append the text and sentiment_score into the DataFrame.
         for tweet in tweets:
-            score = analyzer.polarity_scores(tweet)["compound"]
+            score = self.sentiment_analyzer.polarity_scores(tweet)["compound"]
             tweet_sentiment = {"tweet": tweet, "sentiment_score": score}
             tweet_sentiments_df = pd.concat(
                 [tweet_sentiments_df, pd.DataFrame([tweet_sentiment])],
