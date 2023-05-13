@@ -1,9 +1,6 @@
-import time
-
 import pytest
-import robin_stocks.robinhood as robinhood
 
-from src.trading_bots.base import TradeBot
+from src.bots.base_trade_bot import TradeBot
 from tests.configs import TestMode
 
 # DISCLAIMER: ONLY CHANGE BELOW TEST MODE IF YOU UNDERSTAND THAT THIS TEST

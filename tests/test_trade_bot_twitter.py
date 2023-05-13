@@ -2,13 +2,12 @@ import random
 
 import pytest
 
-from src.trading_bots.twitter_sentiments import TradeBotTwitterSentiments
+from src.bots.twitter_sentiments import TradeBotTwitterSentiments
 
 
 class TestTradeBotTwitterSentimentAnalysis:
     trade_bot = TradeBotTwitterSentiments()
 
-    ##########################################################################
     @pytest.mark.parametrize(
         "ticker,company_name,max_count",
         [("GME", "GameStop", 100), ("AAPL", "Apple", 150), ("AMZN", "Amazon", 200)],
@@ -24,7 +23,6 @@ class TestTradeBotTwitterSentimentAnalysis:
             current_tweet = public_tweets[random_index].lower()
             assert company_name.lower() in current_tweet or ticker.lower() in current_tweet
 
-    ##########################################################################
     @pytest.mark.parametrize(
         "ticker",
         [

@@ -4,7 +4,7 @@ import pandas as pd
 import pyotp
 import robin_stocks.robinhood as robinhood
 
-from src.trading_bots.utilities import ROBINHOOD_MFA_CODE, ROBINHOOD_PASS, ROBINHOOD_USER
+from src.utilities import ROBINHOOD_MFA_CODE, ROBINHOOD_PASS, ROBINHOOD_USER
 
 
 class OrderType(Enum):

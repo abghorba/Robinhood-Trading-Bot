@@ -2,8 +2,8 @@ import pandas as pd
 import tweepy
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-from src.trading_bots.base import OrderType, TradeBot
-from src.trading_bots.utilities import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
+from src.bots.base_trade_bot import OrderType, TradeBot
+from src.utilities import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
 
 MINIMUM_CONSENSUS_BUY_SCORE = 0.05
 MINIMUM_CONSENSUS_SELL_SCORE = -0.05

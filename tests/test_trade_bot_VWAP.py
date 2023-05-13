@@ -1,14 +1,13 @@
 import pandas as pd
 import pytest
 
-from src.trading_bots.volume_weighted_average_price import TradeBotVWAP
+from src.bots.volume_weighted_average_price import TradeBotVWAP
 from tests.configs import AAPL_STOCK_HISTORY_SAMPLE, FB_STOCK_HISTORY_SAMPLE, GOOG_STOCK_HISTORY_SAMPLE
 
 
 class TestTradeBotVWAP:
     trade_bot = TradeBotVWAP()
 
-    ##########################################################################
     @pytest.mark.parametrize(
         "stock_history,expected",
         [

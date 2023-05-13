@@ -1,9 +1,9 @@
 import sys
 
-from src.trading_bots.base import TradeBot
-from src.trading_bots.simple_moving_average import TradeBotSimpleMovingAverage
-from src.trading_bots.twitter_sentiments import TradeBotTwitterSentiments
-from src.trading_bots.volume_weighted_average_price import TradeBotVWAP
+from src.bots.base_trade_bot import TradeBot
+from src.bots.simple_moving_average import TradeBotSimpleMovingAverage
+from src.bots.twitter_sentiments import TradeBotTwitterSentiments
+from src.bots.volume_weighted_average_price import TradeBotVWAP
 
 
 def main():

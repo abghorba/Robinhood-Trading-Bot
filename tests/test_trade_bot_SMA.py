@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from src.trading_bots.simple_moving_average import TradeBotSimpleMovingAverage
+from src.bots.simple_moving_average import TradeBotSimpleMovingAverage
 from tests.configs import STOCK_HISTORY_SAMPLE
 
 
@@ -9,7 +9,6 @@ class TestTradeBotSimpleMovingAverage:
     trade_bot = TradeBotSimpleMovingAverage()
     stock_history_df = pd.DataFrame(STOCK_HISTORY_SAMPLE)
 
-    ##########################################################################
     @pytest.mark.parametrize(
         "stock_history,number_of_days,expected",
         [
