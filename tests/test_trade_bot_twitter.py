@@ -3,8 +3,11 @@ import random
 import pytest
 
 from src.bots.twitter_sentiments import TradeBotTwitterSentiments
+from src.utilities import RobinhoodCredentials, TwitterCredentials
 
 
+@pytest.mark.skipif(RobinhoodCredentials().empty_credentials, reason="Robinhood credentials not provided!")
+@pytest.mark.skipif(TwitterCredentials().empty_credentials, reason="Twitter API credentials not provided!")
 class TestTradeBotTwitterSentimentAnalysis:
     trade_bot = TradeBotTwitterSentiments()
 

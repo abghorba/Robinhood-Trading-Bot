@@ -3,7 +3,7 @@ import tweepy
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 from src.bots.base_trade_bot import OrderType, TradeBot
-from src.utilities import TwitterAuth
+from src.utilities import TwitterCredentials
 
 MINIMUM_CONSENSUS_BUY_SCORE = 0.05
 MINIMUM_CONSENSUS_SELL_SCORE = -0.05
@@ -16,8 +16,8 @@ class TradeBotTwitterSentiments(TradeBot):
         super().__init__()
 
         # Connect to the Twitter API
-        twitter_auth = TwitterAuth()
-        auth = tweepy.AppAuthHandler(twitter_auth.consumer_key, twitter_auth.consumer_secret)
+        twitter_credentials = TwitterCredentials()
+        auth = tweepy.AppAuthHandler(twitter_credentials.consumer_key, twitter_credentials.consumer_secret)
         self.twitter_api = tweepy.API(auth)
 
         # Set up the sentiment analyzer

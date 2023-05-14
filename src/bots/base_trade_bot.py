@@ -4,7 +4,7 @@ import pandas as pd
 import pyotp
 import robin_stocks.robinhood as robinhood
 
-from src.utilities import RobinhoodAuth
+from src.utilities import RobinhoodCredentials
 
 
 class OrderType(Enum):
@@ -17,10 +17,10 @@ class TradeBot:
     def __init__(self):
         """Logs user into their Robinhood account."""
 
-        robinhood_auth = RobinhoodAuth()
+        robinhood_credentials = RobinhoodCredentials()
         totp = None
 
-        if robinhood_auth.mfa_code == "":
+        if robinhood_credentials.mfa_code == "":
             print(
                 "WARNING: MFA code is not supplied. Multi-factor authentication will not be attempted. If your "
                 "Robinhood account uses MFA to log in, this will fail and may lock you out of your accounts for "
@@ -28,9 +28,9 @@ class TradeBot:
             )
 
         else:
-            totp = pyotp.TOTP(robinhood_auth.mfa_code).now()
+            totp = pyotp.TOTP(robinhood_credentials.mfa_code).now()
 
-        robinhood.login(robinhood_auth.user, robinhood_auth.password, mfa_code=totp)
+        robinhood.login(robinhood_credentials.user, robinhood_credentials.password, mfa_code=totp)
 
     def robinhood_logout(self):
         """Logs user out of their Robinhood account."""

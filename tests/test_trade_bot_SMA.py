@@ -2,9 +2,11 @@ import pandas as pd
 import pytest
 
 from src.bots.simple_moving_average import TradeBotSimpleMovingAverage
+from src.utilities import RobinhoodCredentials
 from tests.configs import STOCK_HISTORY_SAMPLE
 
 
+@pytest.mark.skipif(RobinhoodCredentials().empty_credentials, reason="Robinhood credentials not provided!")
 class TestTradeBotSimpleMovingAverage:
     trade_bot = TradeBotSimpleMovingAverage()
     stock_history_df = pd.DataFrame(STOCK_HISTORY_SAMPLE)

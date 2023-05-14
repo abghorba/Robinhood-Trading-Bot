@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class TestMode(Enum):
+class _TestMode(Enum):
     # Skips all market orders
     SKIP_ALL_MARKET_ORDERS = 0
 

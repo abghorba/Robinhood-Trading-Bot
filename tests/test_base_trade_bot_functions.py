@@ -1,16 +1,18 @@
 import pytest
 
 from src.bots.base_trade_bot import TradeBot
-from tests.configs import TestMode
+from src.utilities import RobinhoodCredentials
+from tests.configs import _TestMode
 
 # DISCLAIMER: ONLY CHANGE BELOW TEST MODE IF YOU UNDERSTAND THAT THIS TEST
 # WILL BE MAKING MARKET ORDERS ON YOUR BEHALF. THIS IS FOR TESTING PURPOSES
 # ONLY AND IS NOT MEANT TO BE FINANCIAL ADVICE. YOU MAY LOSE (PART OF) YOUR
 # INVESTMENT THROUGH THE DURATION OF THIS TEST
-TEST_MODE = TestMode.SKIP_ALL_MARKET_ORDERS
+TEST_MODE = _TestMode.SKIP_ALL_MARKET_ORDERS
 MIN_CASH_TO_RUN_TEST = 5
 
 
+@pytest.mark.skipif(RobinhoodCredentials().empty_credentials, reason="Robinhood credentials not provided!")
 class TestTradeBot:
     print("WARNING: Be advised that this test will send REAL market orders with REAL money!")
     print("WARNING: This test could also result in your account being marked for day trading!")
@@ -123,7 +125,7 @@ class TestTradeBot:
         assert stock_history_df.empty if empty_dataframe else not stock_history_df.empty
 
     @pytest.mark.skipif(
-        TEST_MODE in [TestMode.SKIP_ALL_MARKET_ORDERS],
+        TEST_MODE in [_TestMode.SKIP_ALL_MARKET_ORDERS],
         reason="Current TestMode selected will skip this test!",
     )
     @pytest.mark.skipif(not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!")
@@ -145,7 +147,7 @@ class TestTradeBot:
         assert (len(purchase_data) > 0) == expected
 
     @pytest.mark.skipif(
-        TEST_MODE in [TestMode.SKIP_ALL_MARKET_ORDERS],
+        TEST_MODE in [_TestMode.SKIP_ALL_MARKET_ORDERS],
         reason="Current TestMode selected will skip this test!",
     )
     @pytest.mark.skipif(not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!")
@@ -176,7 +178,7 @@ class TestTradeBot:
             ("GOOG", 0, False),
             ("GOOG", 5, False),
             ("AAPL", MIN_CASH_TO_RUN_TEST + 0.01, False),
-            ("AAPL", MIN_CASH_TO_RUN_TEST, TEST_MODE != TestMode.SKIP_ALL_MARKET_ORDERS),
+            ("AAPL", MIN_CASH_TO_RUN_TEST, TEST_MODE != _TestMode.SKIP_ALL_MARKET_ORDERS),
         ],
     )
     def test_has_sufficient_equity(self, ticker, amount_in_dollars, expected):
@@ -184,9 +186,8 @@ class TestTradeBot:
 
         assert self.trade_bot.has_sufficient_equity(ticker, amount_in_dollars) == expected
 
-    ##########################################################################
     @pytest.mark.skipif(
-        TEST_MODE in [TestMode.SKIP_ALL_MARKET_ORDERS],
+        TEST_MODE in [_TestMode.SKIP_ALL_MARKET_ORDERS],
         reason="Current TestMode selected will skip this test!",
     )
     @pytest.mark.skipif(not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!")
@@ -209,9 +210,8 @@ class TestTradeBot:
         sale_data = self.trade_bot.place_sell_order(ticker, amount_in_dollars)
         assert (len(sale_data) > 0) == expected
 
-    ##########################################################################
     @pytest.mark.skipif(
-        TEST_MODE in [TestMode.SKIP_ALL_MARKET_ORDERS, TestMode.TEST_BASIC_MARKET_ORDERS],
+        TEST_MODE in [_TestMode.SKIP_ALL_MARKET_ORDERS, _TestMode.TEST_BASIC_MARKET_ORDERS],
         reason="Current TestMode selected will skip this test!",
     )
     @pytest.mark.skipif(not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!")
@@ -229,9 +229,8 @@ class TestTradeBot:
         else:
             assert len(purchase_data) == 0
 
-    ##########################################################################
     @pytest.mark.skipif(
-        TEST_MODE in [TestMode.SKIP_ALL_MARKET_ORDERS, TestMode.TEST_BASIC_MARKET_ORDERS],
+        TEST_MODE in [_TestMode.SKIP_ALL_MARKET_ORDERS, _TestMode.TEST_BASIC_MARKET_ORDERS],
         reason="Current TestMode selected will skip this test!",
     )
     @pytest.mark.skipif(not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!")
@@ -256,9 +255,8 @@ class TestTradeBot:
         else:
             assert len(sale_data) == 0
 
-    ##########################################################################
     @pytest.mark.skipif(
-        TEST_MODE in [TestMode.SKIP_ALL_MARKET_ORDERS, TestMode.TEST_BASIC_MARKET_ORDERS],
+        TEST_MODE in [_TestMode.SKIP_ALL_MARKET_ORDERS, _TestMode.TEST_BASIC_MARKET_ORDERS],
         reason="Current TestMode selected will skip this test!",
     )
     @pytest.mark.skipif(not enough_funds_to_run_test, reason="Need at least $5.00 to run the test!")

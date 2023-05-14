@@ -2,9 +2,11 @@ import pandas as pd
 import pytest
 
 from src.bots.volume_weighted_average_price import TradeBotVWAP
+from src.utilities import RobinhoodCredentials
 from tests.configs import AAPL_STOCK_HISTORY_SAMPLE, FB_STOCK_HISTORY_SAMPLE, GOOG_STOCK_HISTORY_SAMPLE
 
 
+@pytest.mark.skipif(RobinhoodCredentials().empty_credentials, reason="Robinhood credentials not provided!")
 class TestTradeBotVWAP:
     trade_bot = TradeBotVWAP()
 
